@@ -1,0 +1,2908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Teacher Application Form — School Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  --bg-base:        #040913;
+  --bg-surface:     #0a1120;
+  --bg-card:        linear-gradient(180deg, rgba(8,16,30,0.92) 0%, rgba(6,12,24,0.96) 100%);
+  --bg-input:       rgba(255,255,255,0.045);
+  --bg-input-focus: rgba(255,255,255,0.075);
+
+  --accent:         #00e0c7;
+  --accent-dim:     rgba(0,224,199,0.12);
+  --accent-glow:    rgba(0,224,199,0.22);
+  --accent-2:       #2b7fff;
+  --accent-2-dim:   rgba(43,127,255,0.14);
+
+  --text-primary:   #eef3ff;
+  --text-secondary: #8d98ae;
+  --text-muted:     #566074;
+  --text-label:     #a8b2c3;
+
+  --border:         rgba(133,153,194,0.14);
+  --border-accent:  rgba(0,224,199,0.42);
+
+  --danger:         #f07171;
+  --danger-dim:     rgba(240,113,113,0.15);
+  --success:        #63d9a1;
+  --warning:        #fbbf24;
+
+  --radius-sm:      6px;
+  --radius-md:      12px;
+  --radius-lg:      18px;
+  --radius-xl:      24px;
+
+  --shadow-card:    0 8px 32px rgba(0,0,0,0.45);
+  --shadow-glow:    0 0 24px rgba(0,212,200,0.15);
+
+  --transition:     all 0.22s cubic-bezier(0.4,0,0.2,1);
+  --transition-slow:all 0.45s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ============================================================
+   RESET + BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   BACKGROUND EFFECTS
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0,212,200,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(124,106,247,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(0,212,200,0.03) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* Subtle grid texture */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+#teacher-application-form {
+  position: relative; z-index: 1;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 22px 28px 80px;
+}
+
+/* ============================================================
+   MINIMAL PAGE TITLE
+   ============================================================ */
+.form-mini-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.form-mini-header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+  text-align: center;
+  text-transform: none;
+}
+
+/* ============================================================
+   STEP PROGRESS TRACKER
+   ============================================================ */
+.step-tracker {
+  margin-bottom: 36px;
+  padding: 20px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(0,224,199,0.16), 0 8px 32px rgba(0,0,0,0.45);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+  overflow-x: auto;
+}
+
+.step-tracker-inner {
+  display: flex;
+  align-items: center;
+  min-width: max-content;
+  gap: 0;
+}
+
+.step-dot {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; cursor: pointer; flex-shrink: 0;
+}
+
+.step-dot-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted);
+  transition: var(--transition);
+  position: relative;
+  z-index: 1;
+}
+
+.step-dot.active .step-dot-circle {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.step-dot.completed .step-dot-circle {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg-base);
+}
+
+.step-dot.completed .step-dot-circle::after {
+  content: '✓';
+  font-size: 13px;
+}
+
+.step-dot.completed .step-dot-circle span { display: none; }
+
+.step-dot-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  max-width: 64px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.step-dot.active .step-dot-label { color: var(--accent); }
+.step-dot.completed .step-dot-label { color: var(--text-secondary); }
+
+.step-connector {
+  flex: 1; min-width: 20px; max-width: 48px;
+  height: 2px;
+  background: var(--border);
+  margin: 0 4px;
+  margin-bottom: 20px;
+  transition: var(--transition-slow);
+  flex-shrink: 0;
+}
+
+.step-connector.done {
+  background: linear-gradient(90deg, var(--accent), var(--accent-dim));
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.progress-bar-wrap {
+  height: 3px;
+  background: var(--border);
+  border-radius: 99px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 8px var(--accent-glow);
+  transition: width 0.45s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ============================================================
+   STEP PANEL
+   ============================================================ */
+.step-panel {
+  display: none;
+  animation: fadeSlideIn 0.4s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.step-panel.active { display: block; }
+
+.step-panel.slide-out-left {
+  animation: slideOutLeft 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.step-panel.slide-in-right {
+  animation: fadeSlideIn 0.4s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.step-panel.slide-out-right {
+  animation: slideOutRight 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+.step-panel.slide-in-left {
+  animation: fadeSlideInLeft 0.4s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(28px) scale(0.985); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes fadeSlideInLeft {
+  from { opacity: 0; transform: translateX(-28px) scale(0.985); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes slideOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-28px); }
+}
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(28px); }
+}
+
+/* ============================================================
+   SECTION CARD
+   ============================================================ */
+.form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(0,224,199,0.16), 0 8px 32px rgba(0,0,0,0.45);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.form-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.form-card:hover {
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.section-icon.purple {
+  background: var(--accent-2-dim);
+  border-color: rgba(124,106,247,0.4);
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.section-subtitle {
+  font-size: 12px; color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.step-number-badge {
+  margin-left: auto;
+  font-size: 11px; font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  padding: 3px 10px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   FORM GRID
+   ============================================================ */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 22px;
+  align-items: start;
+}
+
+.form-grid.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.form-grid.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.form-grid.grid-1 { grid-template-columns: 1fr; }
+
+.field-full { grid-column: 1 / -1; }
+
+@media (max-width: 980px) {
+  .form-grid, .form-grid.grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .form-grid, .form-grid.grid-2, .form-grid.grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   FORM FIELDS
+   ============================================================ */
+.field-group { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.field-label {
+  font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-label);
+  display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap;
+  min-height: 38px;
+}
+
+.field-label .bangla-sub {
+  font-family: 'Noto Sans Bengali', sans-serif;
+  font-size: 11px; font-weight: 400;
+  color: var(--text-muted);
+  text-transform: none; letter-spacing: 0;
+}
+
+.field-label .required { color: var(--danger); font-size: 13px; }
+
+.field-input {
+  width: 100%;
+  min-height: 58px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.03));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 16px 18px;
+  outline: none;
+  transition: var(--transition);
+  -webkit-appearance: none;
+}
+
+.field-input:focus {
+  border-color: var(--border-accent);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.field-input:hover:not(:focus) {
+  border-color: rgba(255,255,255,0.14);
+}
+
+.field-input.bangla-field {
+  font-family: 'Noto Sans Bengali', sans-serif;
+  font-size: 15px;
+}
+
+.field-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-dim);
+}
+
+.error-msg {
+  font-size: 11px; color: var(--danger);
+  display: none; margin-top: 2px;
+}
+
+.error-msg.visible { display: block; }
+
+select.field-input { cursor: pointer; padding-right: 44px; }
+
+select.field-input option {
+  background: #1a2035;
+  color: var(--text-primary);
+}
+
+textarea.field-input {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+input[type="date"].field-input,
+select.field-input { min-height: 58px; }
+
+/* ============================================================
+   PHOTO UPLOAD
+   ============================================================ */
+.photo-upload-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.photo-upload-area {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 12px;
+}
+
+.photo-preview-wrap {
+  width: 190px; height: 240px;
+  border-radius: 24px;
+  border: 1px solid rgba(145, 170, 212, 0.18);
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.photo-preview-wrap:hover {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 12px var(--accent-dim);
+}
+
+.photo-preview-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: none;
+}
+
+.photo-placeholder {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--text-muted); font-size: 12px; text-align: center;
+  padding: 8px;
+  pointer-events: none;
+}
+
+.photo-placeholder-icon { font-size: 28px; }
+
+.photo-upload-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 190px;
+  min-height: 48px;
+  padding: 0 18px;
+  font-size: 13px; font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  border: 1px solid var(--border-accent);
+  border-radius: 14px;
+  background: rgba(0,224,199,0.08);
+  text-decoration: none;
+}
+
+.photo-upload-btn:hover { background: rgba(0,224,199,0.14); }
+
+/* ============================================================
+   FILE UPLOAD
+   ============================================================ */
+.file-upload-area {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg-input);
+  position: relative;
+}
+
+.file-upload-area:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-input-focus);
+}
+
+.file-upload-area input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+
+.file-upload-label {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  pointer-events: none;
+}
+
+.file-upload-icon { font-size: 22px; color: var(--accent); }
+.file-upload-text { font-size: 12px; color: var(--text-secondary); }
+.file-upload-text strong { color: var(--accent); }
+.file-name-display { font-size: 11px; color: var(--success); margin-top: 6px; word-break: break-all; }
+
+/* ============================================================
+   RADIO / CHECKBOX GROUPS
+   ============================================================ */
+.radio-group, .checkbox-group {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+
+.radio-option, .checkbox-option {
+  position: relative;
+}
+
+.radio-option input, .checkbox-option input {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+
+.radio-option label, .checkbox-option label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.radio-option input:checked + label,
+.checkbox-option input:checked + label {
+  border-color: var(--border-accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.radio-option label:hover,
+.checkbox-option label:hover {
+  border-color: rgba(255,255,255,0.14);
+  color: var(--text-primary);
+}
+
+.toggle-pill {
+  display: flex; gap: 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.toggle-pill input { display: none; }
+
+.toggle-pill label {
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.toggle-pill input:checked + label {
+  background: var(--accent);
+  color: var(--bg-base);
+  font-weight: 600;
+}
+
+/* ============================================================
+   REPEATABLE ROWS
+   ============================================================ */
+.repeatable-list { display: flex; flex-direction: column; gap: 20px; }
+
+.repeatable-item {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.repeatable-item:hover {
+  border-color: rgba(255,255,255,0.1);
+}
+
+.repeatable-item-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.repeatable-item-title {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent);
+}
+
+.btn-remove-item {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--danger-dim);
+  background: var(--danger-dim);
+  color: var(--danger);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  line-height: 1;
+}
+
+.btn-remove-item:hover {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+
+.btn-add-item {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px;
+  background: var(--accent-dim);
+  border: 1px dashed var(--border-accent);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 8px;
+}
+
+.btn-add-item:hover {
+  background: rgba(0,212,200,0.25);
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   DECLARATION
+   ============================================================ */
+.declaration-checkbox {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.declaration-checkbox:hover {
+  border-color: rgba(255,255,255,0.14);
+}
+
+.declaration-checkbox input[type="checkbox"] {
+  width: 18px; height: 18px; flex-shrink: 0;
+  margin-top: 1px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.declaration-checkbox label {
+  font-size: 13.5px; color: var(--text-secondary);
+  line-height: 1.6;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ============================================================
+   NAVIGATION BUTTONS
+   ============================================================ */
+.form-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-step-info {
+  font-size: 12px; color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.nav-step-info strong { color: var(--accent); }
+
+.nav-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: var(--transition);
+  outline: none;
+  white-space: nowrap;
+}
+
+.btn-secondary {
+  background: var(--bg-input);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text-primary);
+  background: var(--bg-input-focus);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #00b8ae);
+  color: var(--bg-base);
+  border-color: transparent;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px var(--accent-glow);
+  filter: brightness(1.08);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--success), #3abeaf);
+  color: var(--bg-base);
+  box-shadow: 0 4px 16px rgba(99,217,161,0.3);
+  padding: 13px 28px;
+  font-size: 15px;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(99,217,161,0.45);
+}
+
+.btn-icon { font-size: 16px; }
+
+/* ============================================================
+   SKILLS CHECKLIST
+   ============================================================ */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.skill-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.skill-item:hover { border-color: rgba(255,255,255,0.14); }
+
+.skill-item input { accent-color: var(--accent); cursor: pointer; }
+
+.skill-item label {
+  font-size: 13px; color: var(--text-secondary);
+  cursor: pointer;
+}
+
+/* ============================================================
+   DOCUMENT UPLOAD GRID
+   ============================================================ */
+.doc-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.doc-upload-item { display: flex; flex-direction: column; gap: 6px; }
+
+.doc-label {
+  font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-label);
+}
+
+/* ============================================================
+   SUCCESS STATE
+   ============================================================ */
+.success-panel {
+  display: none;
+  text-align: center;
+  padding: 60px 32px;
+  background: var(--bg-card);
+  border: 1px solid rgba(99,217,161,0.3);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 40px rgba(99,217,161,0.1);
+}
+
+.success-panel.visible { display: block; animation: fadeSlideIn 0.5s ease both; }
+
+.success-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(99,217,161,0.15);
+  border: 2px solid var(--success);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 24px;
+  box-shadow: 0 0 30px rgba(99,217,161,0.2);
+}
+
+.success-panel h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--success); margin-bottom: 8px;
+}
+
+.success-panel p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+
+.app-ref {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: rgba(99,217,161,0.1);
+  border: 1px solid rgba(99,217,161,0.3);
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 700;
+  color: var(--success);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   SIGNATURE FIELD
+   ============================================================ */
+.signature-canvas-wrap {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+  transition: var(--transition);
+}
+
+.signature-canvas-wrap:hover { border-color: var(--border-accent); }
+
+#signatureCanvas {
+  display: block;
+  width: 100%; height: 100px;
+  background: var(--bg-input);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.sig-controls {
+  display: flex; gap: 8px;
+  margin-top: 6px;
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 11px; font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.btn-sm:hover { border-color: var(--border-accent); color: var(--accent); }
+
+/* ============================================================
+   TOOLTIP
+   ============================================================ */
+.optional-badge {
+  font-size: 10px; font-weight: 400;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 99px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 24px 0;
+}
+
+/* ============================================================
+   INFO BOX
+   ============================================================ */
+.info-box {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 16px 18px;
+  background: rgba(0,224,199,0.08);
+  border: 1px solid rgba(0,224,199,0.26);
+  border-radius: 16px;
+  font-size: 13.5px; color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+.info-box.hidden { display: none; }
+
+.info-box-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ============================================================
+   PLACEHOLDER TEXT
+   ============================================================ */
+::placeholder { color: #596482; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  #teacher-application-form { padding: 16px 12px 60px; }
+  .form-card { padding: 20px 16px; }
+  .photo-upload-row { grid-template-columns: 1fr; }
+  .photo-upload-area { align-items: center; }
+  .photo-upload-btn { min-width: 100%; }
+  .form-nav { flex-direction: column-reverse; align-items: stretch; }
+  .nav-buttons { width: 100%; justify-content: space-between; }
+  .btn { flex: 1; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<div id="teacher-application-form">
+
+  <div class="form-mini-header">
+    <h1>Teacher Application Form</h1>
+  </div>
+
+  <!-- ========== STEP TRACKER ========== -->
+  <div class="step-tracker">
+    <div class="step-tracker-inner" id="stepTrackerInner">
+      <!-- Generated by JS -->
+    </div>
+  </div>
+
+  <!-- ========== PROGRESS BAR ========== -->
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar" style="width:10%"></div>
+  </div>
+
+  <!-- ====================================================
+       STEP 1: BASIC IDENTITY
+       ==================================================== -->
+  <div class="step-panel active" data-step="1" id="step1">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">👤</div>
+        <div>
+          <div class="section-title">Basic Identity</div>
+          <div class="section-subtitle">Personal identification information / ব্যক্তিগত পরিচয়</div>
+        </div>
+        <span class="step-number-badge">Step 1 / 10</span>
+      </div>
+
+      <div class="form-grid">
+        <!-- Applicant Photo -->
+        <div class="photo-upload-row">
+          <div class="photo-upload-area">
+            <div class="photo-preview-wrap" onclick="document.getElementById('photoInput').click()">
+              <img id="photoPreview" src="" alt="Photo Preview" />
+              <div class="photo-placeholder" id="photoPlaceholder">
+                <div class="photo-placeholder-icon">📷</div>
+                <div>Upload Photo</div>
+                <div style="font-size:10px; color:var(--text-muted)">passport size</div>
+              </div>
+            </div>
+            <label class="photo-upload-btn" for="photoInput">Choose Photo</label>
+            <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(this)" />
+            <div style="font-size:11px; color:var(--text-muted); text-align:center; max-width:190px">JPG/PNG max 2MB<br>300×400px</div>
+          </div>
+          <div class="info-box" id="photoInfoBox">
+            <div class="info-box-icon">ℹ️</div>
+            <div>Please upload a recent passport-size photo. The photo must have a white or light background. Ensure your face is clearly visible.</div>
+          </div>
+        </div>
+
+        <!-- Full Name English -->
+        <div class="field-group">
+          <div class="field-label">Full Name (English) <span class="required">*</span></div>
+          <input type="text" class="field-input" id="fullNameEn" placeholder="As per NID" required />
+          <div class="error-msg" id="err-fullNameEn">Full name in English is required.</div>
+        </div>
+
+        <!-- Full Name Bangla -->
+        <div class="field-group">
+          <div class="field-label">পূর্ণ নাম (বাংলা) <span class="required">*</span>
+            <span class="bangla-sub">Bangla Name</span>
+          </div>
+          <input type="text" class="field-input bangla-field" id="fullNameBn" placeholder="বাংলায় লিখুন" required />
+          <div class="error-msg" id="err-fullNameBn">Full name in Bangla is required.</div>
+        </div>
+
+        <!-- Father's Name -->
+        <div class="field-group">
+          <div class="field-label">Father's Name <span class="required">*</span>
+            <span class="bangla-sub">পিতার নাম</span>
+          </div>
+          <input type="text" class="field-input" id="fatherName" placeholder="Father's full name" required />
+          <div class="error-msg" id="err-fatherName">Father's name is required.</div>
+        </div>
+
+        <!-- Mother's Name -->
+        <div class="field-group">
+          <div class="field-label">Mother's Name <span class="required">*</span>
+            <span class="bangla-sub">মাতার নাম</span>
+          </div>
+          <input type="text" class="field-input" id="motherName" placeholder="Mother's full name" required />
+          <div class="error-msg" id="err-motherName">Mother's name is required.</div>
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="field-group">
+          <div class="field-label">Date of Birth <span class="required">*</span>
+            <span class="bangla-sub">জন্ম তারিখ</span>
+          </div>
+          <input type="date" class="field-input" id="dob" required />
+          <div class="error-msg" id="err-dob">Date of birth is required.</div>
+        </div>
+
+        <!-- Gender -->
+        <div class="field-group">
+          <div class="field-label">Gender <span class="required">*</span>
+            <span class="bangla-sub">লিঙ্গ</span>
+          </div>
+          <select class="field-input" id="gender" required>
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+          <div class="error-msg" id="err-gender">Gender is required.</div>
+        </div>
+
+        <!-- Marital Status -->
+        <div class="field-group">
+          <div class="field-label">Marital Status <span class="required">*</span>
+            <span class="bangla-sub">বৈবাহিক অবস্থা</span>
+          </div>
+          <select class="field-input" id="maritalStatus" required>
+            <option value="">Select Status</option>
+            <option>Single</option>
+            <option>Married</option>
+            <option>Divorced</option>
+            <option>Widowed</option>
+          </select>
+          <div class="error-msg" id="err-maritalStatus">Marital status is required.</div>
+        </div>
+
+        <!-- Nationality -->
+        <div class="field-group">
+          <div class="field-label">Nationality <span class="required">*</span>
+            <span class="bangla-sub">জাতীয়তা</span>
+          </div>
+          <input type="text" class="field-input" id="nationality" value="Bangladeshi" placeholder="Nationality" required />
+          <div class="error-msg" id="err-nationality">Nationality is required.</div>
+        </div>
+
+        <!-- National ID -->
+        <div class="field-group">
+          <div class="field-label">National ID Number <span class="required">*</span>
+            <span class="bangla-sub">জাতীয় পরিচয়পত্র নম্বর</span>
+          </div>
+          <input type="text" class="field-input" id="nidNumber" placeholder="NID Number" maxlength="17" required />
+          <div class="error-msg" id="err-nidNumber">National ID number is required.</div>
+        </div>
+
+        <!-- Birth Reg Number -->
+        <div class="field-group">
+          <div class="field-label">Birth Registration Number
+            <span class="bangla-sub">জন্ম নিবন্ধন নম্বর</span>
+          </div>
+          <input type="text" class="field-input" id="birthRegNo" placeholder="17-digit number" maxlength="17" />
+        </div>
+
+      <!-- Nav -->
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>1</strong> of <strong>10</strong> — Basic Identity</div>
+        <div class="nav-buttons">
+          <button class="btn btn-primary" onclick="nextStep(1)">
+            Next <span class="btn-icon">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 2: CONTACT + JOB APPLICATION
+       ==================================================== -->
+  <div class="step-panel" data-step="2" id="step2">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">📞</div>
+        <div>
+          <div class="section-title">Contact Information</div>
+          <div class="section-subtitle">যোগাযোগের তথ্য</div>
+        </div>
+        <span class="step-number-badge">Step 2 / 10</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field-group">
+          <div class="field-label">Mobile Number <span class="required">*</span>
+            <span class="bangla-sub">মোবাইল নম্বর</span>
+          </div>
+          <input type="tel" class="field-input" id="mobileNo" placeholder="+880 1X-XXXX-XXXX" required />
+          <div class="error-msg" id="err-mobileNo">Mobile number is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Alternative Mobile
+            <span class="optional-badge">Optional</span>
+          </div>
+          <input type="tel" class="field-input" id="altMobileNo" placeholder="+880 1X-XXXX-XXXX" />
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Email Address <span class="required">*</span></div>
+          <input type="email" class="field-input" id="emailAddr" placeholder="teacher@example.com" required />
+          <div class="error-msg" id="err-emailAddr">Valid email address is required.</div>
+        </div>
+
+        <div class="field-group field-full">
+          <div class="field-label">Present Address <span class="required">*</span>
+            <span class="bangla-sub">বর্তমান ঠিকানা</span>
+          </div>
+          <textarea class="field-input" id="presentAddr" placeholder="House, Road, Area..." rows="3" required></textarea>
+          <div class="error-msg" id="err-presentAddr">Present address is required.</div>
+        </div>
+
+        <div class="field-group field-full">
+          <div class="field-label">Permanent Address <span class="required">*</span>
+            <span class="bangla-sub">স্থায়ী ঠিকানা</span>
+          </div>
+          <textarea class="field-input" id="permanentAddr" placeholder="House, Road, Area..." rows="3" required></textarea>
+          <div class="error-msg" id="err-permanentAddr">Permanent address is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">District <span class="required">*</span>
+            <span class="bangla-sub">জেলা</span>
+          </div>
+          <select class="field-input" id="district" required>
+            <option value="">Select District</option>
+            <option>Dhaka</option><option>Chittagong</option><option>Rajshahi</option>
+            <option>Khulna</option><option>Barisal</option><option>Sylhet</option>
+            <option>Comilla</option><option>Mymensingh</option><option>Rangpur</option>
+            <option>Gazipur</option><option>Narayanganj</option><option>Tangail</option>
+            <option>Jessore</option><option>Bogra</option><option>Dinajpur</option>
+            <option>Other</option>
+          </select>
+          <div class="error-msg" id="err-district">District is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Thana / Upazila <span class="required">*</span>
+            <span class="bangla-sub">থানা / উপজেলা</span>
+          </div>
+          <input type="text" class="field-input" id="thana" placeholder="Thana or Upazila name" required />
+          <div class="error-msg" id="err-thana">Thana/Upazila is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Post Code</div>
+          <input type="text" class="field-input" id="postCode" placeholder="e.g. 1207" maxlength="6" />
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="section-header">
+        <div class="section-icon purple">💼</div>
+        <div>
+          <div class="section-title">Job Application Details</div>
+          <div class="section-subtitle">পদের তথ্য</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field-group">
+          <div class="field-label">Applying For Post <span class="required">*</span>
+            <span class="bangla-sub">পদের নাম</span>
+          </div>
+          <select class="field-input" id="applyingPost" required>
+            <option value="">Select Post</option>
+            <option>Assistant Teacher</option>
+            <option>Senior Teacher</option>
+            <option>Subject Teacher</option>
+            <option>Assistant Head Teacher</option>
+            <option>Head Teacher</option>
+            <option>Lab Assistant</option>
+          </select>
+          <div class="error-msg" id="err-applyingPost">Post is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Subject / Department <span class="required">*</span>
+            <span class="bangla-sub">বিষয়</span>
+          </div>
+          <select class="field-input" id="subject" required onchange="toggleOtherSubjectField()">
+            <option value="">Select Subject</option>
+            <option>Bangla</option>
+            <option>English</option>
+            <option>Mathematics</option>
+            <option>Higher Mathematics</option>
+            <option>General Science</option>
+            <option>Physics</option>
+            <option>Chemistry</option>
+            <option>Biology</option>
+            <option>ICT / Computer Science</option>
+            <option>History</option>
+            <option>Business Studies</option>
+            <option>Finance & Banking</option>
+            <option>Entrepreneurship</option>
+            <option>Agriculture Studies</option>
+            <option>Islamic Studies</option>
+            <option>Arabic</option>
+            <option>Fiqh</option>
+            <option>Quran</option>
+            <option>Home Science</option>
+            <option>Sociology</option>
+            <option>Statistics</option>
+            <option>Environmental Science</option>
+            <option>Other</option>
+          </select>
+          <div class="error-msg" id="err-subject">Subject is required.</div>
+        </div>
+
+        <div class="field-group" id="otherSubjectGroup" style="display:none;">
+          <div class="field-label">Other Subject Name <span class="required">*</span>
+            <span class="bangla-sub">বিষয়ের নাম লিখুন</span>
+          </div>
+          <input type="text" class="field-input" id="otherSubjectName" placeholder="Write the subject name" />
+          <div class="error-msg" id="err-otherSubjectName">Please write the subject name.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Teaching Level <span class="required">*</span></div>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="teachingLevel" id="tl1" value="Secondary" />
+              <label for="tl1">Secondary</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="teachingLevel" id="tl2" value="School & College" />
+              <label for="tl2">School & College</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="teachingLevel" id="tl3" value="Primary" />
+              <label for="tl3">Primary</label>
+            </div>
+          </div>
+          <div class="error-msg" id="err-teachingLevel">Teaching level is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Expected Joining Date <span class="required">*</span></div>
+          <input type="date" class="field-input" id="joiningDate" required />
+          <div class="error-msg" id="err-joiningDate">Expected joining date is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Employment Type <span class="required">*</span></div>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="employmentType" id="et1" value="Full-time" />
+              <label for="et1">Full-time</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="employmentType" id="et2" value="Part-time" />
+              <label for="et2">Part-time</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="employmentType" id="et3" value="Contractual" />
+              <label for="et3">Contractual</label>
+            </div>
+          </div>
+          <div class="error-msg" id="err-employmentType">Employment type is required.</div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>2</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(2)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(2)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 3: ACADEMIC QUALIFICATIONS
+       ==================================================== -->
+  <div class="step-panel" data-step="3" id="step3">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">🎓</div>
+        <div>
+          <div class="section-title">Academic Qualifications</div>
+          <div class="section-subtitle">শিক্ষাগত যোগ্যতা</div>
+        </div>
+        <span class="step-number-badge">Step 3 / 10</span>
+      </div>
+
+      <div class="info-box" id="photoInfoBox">
+        <div class="info-box-icon">📚</div>
+        <div>List all academic qualifications starting from SSC. Use the <strong>Add Qualification</strong> button to add more entries. You must add at least one qualification.</div>
+      </div>
+
+      <div class="repeatable-list" id="qualificationList">
+        <!-- Populated by JS -->
+      </div>
+
+      <button class="btn-add-item" onclick="addQualification()">
+        ＋ Add Qualification
+      </button>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>3</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(3)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(3)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 4: PROFESSIONAL QUALIFICATIONS
+       ==================================================== -->
+  <div class="step-panel" data-step="4" id="step4">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">📜</div>
+        <div>
+          <div class="section-title">Professional & Teaching Qualifications</div>
+          <div class="section-subtitle">পেশাগত যোগ্যতা ও প্রশিক্ষণ</div>
+        </div>
+        <span class="step-number-badge">Step 4 / 10</span>
+      </div>
+
+      <div class="form-grid">
+        <!-- B.Ed / M.Ed -->
+        <div class="field-group">
+          <div class="field-label">B.Ed / M.Ed Degree</div>
+          <select class="field-input" id="bedMed">
+            <option value="">Select if applicable</option>
+            <option>B.Ed</option>
+            <option>M.Ed</option>
+            <option>Both B.Ed and M.Ed</option>
+            <option>Not Applicable</option>
+          </select>
+        </div>
+
+        <!-- NTRCA -->
+        <div class="field-group">
+          <div class="field-label">NTRCA Status <span class="required">*</span></div>
+          <select class="field-input" id="ntrcaStatus" required>
+            <option value="">Select Status</option>
+            <option>Registered (Certificate Obtained)</option>
+            <option>Awaiting Result</option>
+            <option>Not Registered</option>
+            <option>Exempted</option>
+          </select>
+          <div class="error-msg" id="err-ntrcaStatus">NTRCA status is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">NTRCA Certificate Number</div>
+          <input type="text" class="field-input" id="ntrcaCertNo" placeholder="If registered" />
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">NTRCA Level</div>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="ntrcaLevel" id="nl1" value="School" />
+              <label for="nl1">School</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="ntrcaLevel" id="nl2" value="School-2" />
+              <label for="nl2">School-2</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="ntrcaLevel" id="nl3" value="College" />
+              <label for="nl3">College</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="ntrcaLevel" id="nl4" value="N/A" />
+              <label for="nl4">N/A</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">MPO Experience <span class="required">*</span>
+            <span class="bangla-sub">এমপিও অভিজ্ঞতা</span>
+          </div>
+          <div class="toggle-pill">
+            <input type="radio" name="mpoExp" id="mpo_yes" value="Yes" />
+            <label for="mpo_yes">Yes</label>
+            <input type="radio" name="mpoExp" id="mpo_no" value="No" checked />
+            <label for="mpo_no">No</label>
+          </div>
+          <div class="error-msg" id="err-mpoExp"></div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Teaching License / Certification
+            <span class="optional-badge">Optional</span>
+          </div>
+          <input type="text" class="field-input" id="teachLicense" placeholder="Certificate name if any" />
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Computer Skills Level</div>
+          <select class="field-input" id="computerSkills">
+            <option value="">Select Level</option>
+            <option>No knowledge</option>
+            <option>Basic</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">English Communication Level</div>
+          <select class="field-input" id="englishLevel">
+            <option value="">Select Level</option>
+            <option>Beginner</option>
+            <option>Elementary (A2)</option>
+            <option>Intermediate (B1)</option>
+            <option>Upper Intermediate (B2)</option>
+            <option>Advanced (C1/C2)</option>
+          </select>
+        </div>
+
+        <div class="field-group field-full">
+          <div class="field-label">Training Received
+            <span class="optional-badge">Optional</span>
+          </div>
+          <textarea class="field-input" id="trainingReceived" placeholder="List any training programs, workshops, or professional development received..." rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>4</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(4)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(4)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 5: TEACHING EXPERIENCE
+       ==================================================== -->
+  <div class="step-panel" data-step="5" id="step5">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">🏛️</div>
+        <div>
+          <div class="section-title">Teaching Experience</div>
+          <div class="section-subtitle">শিক্ষাদান অভিজ্ঞতা</div>
+        </div>
+        <span class="step-number-badge">Step 5 / 10</span>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-icon">💡</div>
+        <div>Add your teaching experience records. If you have no prior teaching experience, you may skip this section and proceed.</div>
+      </div>
+
+      <div class="repeatable-list" id="experienceList">
+        <!-- Populated by JS -->
+      </div>
+
+      <button class="btn-add-item" onclick="addExperience()">
+        ＋ Add Experience
+      </button>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>5</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(5)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(5)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 6: TEACHING SUITABILITY + SKILLS
+       ==================================================== -->
+  <div class="step-panel" data-step="6" id="step6">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">🎯</div>
+        <div>
+          <div class="section-title">Teaching Suitability & Skills</div>
+          <div class="section-subtitle">পাঠদান উপযুক্ততা ও দক্ষতা</div>
+        </div>
+        <span class="step-number-badge">Step 6 / 10</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field-group">
+          <div class="field-label">Preferred Subjects to Teach <span class="required">*</span></div>
+          <input type="text" class="field-input" id="preferredSubjects" placeholder="e.g. Physics, Mathematics" required />
+          <div class="error-msg" id="err-preferredSubjects">This field is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Additional Subjects Able to Teach
+            <span class="optional-badge">Optional</span>
+          </div>
+          <input type="text" class="field-input" id="additionalSubjects" placeholder="e.g. Chemistry, Biology" />
+        </div>
+
+        <div class="field-group field-full">
+          <div class="field-label">Classes Able to Handle <span class="required">*</span></div>
+          <div class="checkbox-group">
+            <div class="checkbox-option">
+              <input type="checkbox" id="cls68" name="classRange" value="Class 6–8" />
+              <label for="cls68">Class 6–8</label>
+            </div>
+            <div class="checkbox-option">
+              <input type="checkbox" id="cls910" name="classRange" value="Class 9–10" />
+              <label for="cls910">Class 9–10</label>
+            </div>
+            <div class="checkbox-option">
+              <input type="checkbox" id="cls1112" name="classRange" value="Class 11–12" />
+              <label for="cls1112">Class 11–12</label>
+            </div>
+          </div>
+          <div class="error-msg" id="err-classRange">Please select at least one class range.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Coaching / Private Tutoring? <span class="required">*</span></div>
+          <div class="toggle-pill">
+            <input type="radio" name="coachingInvolved" id="ci_yes" value="Yes" />
+            <label for="ci_yes">Yes</label>
+            <input type="radio" name="coachingInvolved" id="ci_no" value="No" checked />
+            <label for="ci_no">No</label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Willing: Exam Invigilation? <span class="required">*</span></div>
+          <div class="toggle-pill">
+            <input type="radio" name="examInvig" id="ei_yes" value="Yes" checked />
+            <label for="ei_yes">Yes</label>
+            <input type="radio" name="examInvig" id="ei_no" value="No" />
+            <label for="ei_no">No</label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Willing: Class Teacher Duty?</div>
+          <div class="toggle-pill">
+            <input type="radio" name="classTeacher" id="ct_yes" value="Yes" checked />
+            <label for="ct_yes">Yes</label>
+            <input type="radio" name="classTeacher" id="ct_no" value="No" />
+            <label for="ct_no">No</label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Willing: Co-curricular Activities?</div>
+          <div class="toggle-pill">
+            <input type="radio" name="coCurricular" id="cc_yes" value="Yes" checked />
+            <label for="cc_yes">Yes</label>
+            <input type="radio" name="coCurricular" id="cc_no" value="No" />
+            <label for="cc_no">No</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="section-header" style="margin-bottom:16px;">
+        <div class="section-icon purple">💻</div>
+        <div>
+          <div class="section-title">Skills Assessment</div>
+          <div class="section-subtitle">দক্ষতা মূল্যায়ন</div>
+        </div>
+      </div>
+
+      <div class="form-grid grid-2">
+        <div class="field-group">
+          <div class="field-label">ICT Skills Level</div>
+          <select class="field-input" id="ictSkills">
+            <option value="">Select</option>
+            <option>None</option><option>Basic</option>
+            <option>Intermediate</option><option>Advanced</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Spoken English Level</div>
+          <select class="field-input" id="spokenEnglish">
+            <option value="">Select</option>
+            <option>Beginner</option><option>Functional</option>
+            <option>Fluent</option><option>Native/Near-native</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="field-label" style="margin-bottom:10px;">Software / Platform Proficiency</div>
+        <div class="skills-grid">
+          <div class="skill-item">
+            <input type="checkbox" id="sk_word" value="MS Word" />
+            <label for="sk_word">MS Word</label>
+          </div>
+          <div class="skill-item">
+            <input type="checkbox" id="sk_excel" value="MS Excel" />
+            <label for="sk_excel">MS Excel</label>
+          </div>
+          <div class="skill-item">
+            <input type="checkbox" id="sk_ppt" value="PowerPoint" />
+            <label for="sk_ppt">PowerPoint</label>
+          </div>
+          <div class="skill-item">
+            <input type="checkbox" id="sk_gclassroom" value="Google Classroom" />
+            <label for="sk_gclassroom">Google Classroom</label>
+          </div>
+          <div class="skill-item">
+            <input type="checkbox" id="sk_banglatype" value="Bangla Typing" />
+            <label for="sk_banglatype">Bangla Typing</label>
+          </div>
+          <div class="skill-item">
+            <input type="checkbox" id="sk_engtype" value="English Typing" />
+            <label for="sk_engtype">English Typing</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>6</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(6)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(6)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 7: PERSONAL & BACKGROUND
+       ==================================================== -->
+  <div class="step-panel" data-step="7" id="step7">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">🩺</div>
+        <div>
+          <div class="section-title">Personal & Background Information</div>
+          <div class="section-subtitle">ব্যক্তিগত পটভূমির তথ্য</div>
+        </div>
+        <span class="step-number-badge">Step 7 / 10</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field-group">
+          <div class="field-label">Blood Group</div>
+          <select class="field-input" id="bloodGroup">
+            <option value="">Select</option>
+            <option>A+</option><option>A−</option>
+            <option>B+</option><option>B−</option>
+            <option>AB+</option><option>AB−</option>
+            <option>O+</option><option>O−</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Physical Disability
+            <span class="optional-badge">Optional</span>
+          </div>
+          <input type="text" class="field-input" id="physicalDisability" placeholder="Specify if any, or leave blank" />
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Relatives in This Institution?</div>
+          <div class="toggle-pill">
+            <input type="radio" name="relativesHere" id="rh_yes" value="Yes" />
+            <label for="rh_yes">Yes</label>
+            <input type="radio" name="relativesHere" id="rh_no" value="No" checked />
+            <label for="rh_no">No</label>
+          </div>
+        </div>
+
+        <div class="field-group" id="relativeDetailWrap" style="display:none;">
+          <div class="field-label">Relative's Details</div>
+          <input type="text" class="field-input" id="relativeDetail" placeholder="Name, Designation, Relation" />
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Emergency Contact Person <span class="required">*</span></div>
+          <input type="text" class="field-input" id="emergencyName" placeholder="Full name" required />
+          <div class="error-msg" id="err-emergencyName">Emergency contact name is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Emergency Contact Number <span class="required">*</span></div>
+          <input type="tel" class="field-input" id="emergencyNumber" placeholder="+880 1X-XXXX-XXXX" required />
+          <div class="error-msg" id="err-emergencyNumber">Emergency contact number is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Relation with Emergency Contact <span class="required">*</span></div>
+          <select class="field-input" id="emergencyRelation" required>
+            <option value="">Select Relation</option>
+            <option>Father</option><option>Mother</option><option>Spouse</option>
+            <option>Sibling</option><option>Child</option><option>Friend</option>
+            <option>Colleague</option><option>Other</option>
+          </select>
+          <div class="error-msg" id="err-emergencyRelation">Relation is required.</div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>7</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(7)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(7)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 8: DOCUMENT UPLOAD
+       ==================================================== -->
+  <div class="step-panel" data-step="8" id="step8">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">📁</div>
+        <div>
+          <div class="section-title">Document Upload</div>
+          <div class="section-subtitle">নথিপত্র আপলোড</div>
+        </div>
+        <span class="step-number-badge">Step 8 / 10</span>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-icon">⚠️</div>
+        <div>Upload clear, legible scans or photos of your documents. Accepted formats: <strong>PDF, JPG, PNG</strong>. Maximum 5MB per file. Required uploads are marked with <span style="color:var(--danger)">*</span></div>
+      </div>
+
+      <div class="doc-upload-grid">
+
+        <div class="doc-upload-item">
+          <div class="doc-label">Passport-size Photo <span class="required">*</span></div>
+          <div class="file-upload-area">
+            <input type="file" id="docPhoto" accept="image/*" onchange="showFileName(this, 'fn_docPhoto')" />
+            <div class="file-upload-label">
+              <div class="file-upload-icon">🖼️</div>
+              <div class="file-upload-text">Drop or <strong>Browse</strong></div>
+            </div>
+            <div class="file-name-display" id="fn_docPhoto"></div>
+          </div>
+          <div class="error-msg" id="err-docPhoto">Photo is required.</div>
+        </div>
+
+        <div class="doc-upload-item">
+          <div class="doc-label">National ID Copy <span class="required">*</span></div>
+          <div class="file-upload-area">
+            <input type="file" id="docNID" accept=".pdf,image/*" onchange="showFileName(this, 'fn_docNID')" />
+            <div class="file-upload-label">
+              <div class="file-upload-icon">🪪</div>
+              <div class="file-upload-text">Drop or <strong>Browse</strong></div>
+            </div>
+            <div class="file-name-display" id="fn_docNID"></div>
+          </div>
+          <div class="error-msg" id="err-docNID">NID copy is required.</div>
+        </div>
+
+        <div class="doc-upload-item">
+          <div class="doc-label">All Academic Certificates <span class="required">*</span></div>
+          <div class="file-upload-area">
+            <input type="file" id="docCerts" accept=".pdf,image/*" multiple onchange="showFileName(this, 'fn_docCerts')" />
+            <div class="file-upload-label">
+              <div class="file-upload-icon">📄</div>
+              <div class="file-upload-text">Multiple files <strong>OK</strong></div>
+            </div>
+            <div class="file-name-display" id="fn_docCerts"></div>
+          </div>
+          <div class="error-msg" id="err-docCerts">Academic certificates are required.</div>
+        </div>
+
+        <div class="doc-upload-item">
+          <div class="doc-label">Transcript / Marksheet</div>
+          <div class="file-upload-area">
+            <input type="file" id="docTranscript" accept=".pdf,image/*" multiple onchange="showFileName(this, 'fn_docTranscript')" />
+            <div class="file-upload-label">
+              <div class="file-upload-icon">📋</div>
+              <div class="file-upload-text">Drop or <strong>Browse</strong></div>
+            </div>
+            <div class="file-name-display" id="fn_docTranscript"></div>
+          </div>
+        </div>
+
+        <div class="doc-upload-item">
+          <div class="doc-label">Experience Certificates</div>
+          <div class="file-upload-area">
+            <input type="file" id="docExpCerts" accept=".pdf,image/*" multiple onchange="showFileName(this, 'fn_docExpCerts')" />
+            <div class="file-upload-label">
+              <div class="file-upload-icon">🏅</div>
+              <div class="file-upload-text">Multiple files <strong>OK</strong></div>
+            </div>
+            <div class="file-name-display" id="fn_docExpCerts"></div>
+          </div>
+        </div>
+
+        <div class="doc-upload-item">
+          <div class="doc-label">Signature Upload <span class="required">*</span></div>
+          <div class="file-upload-area">
+            <input type="file" id="docSignature" accept="image/*" onchange="showFileName(this, 'fn_docSignature')" />
+            <div class="file-upload-label">
+              <div class="file-upload-icon">✍️</div>
+              <div class="file-upload-text">Scan or photo of <strong>signature</strong></div>
+            </div>
+            <div class="file-name-display" id="fn_docSignature"></div>
+          </div>
+          <div class="error-msg" id="err-docSignature">Signature upload is required.</div>
+        </div>
+
+      </div>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>8</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(8)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(8)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 9: REFERENCES
+       ==================================================== -->
+  <div class="step-panel" data-step="9" id="step9">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">🤝</div>
+        <div>
+          <div class="section-title">References</div>
+          <div class="section-subtitle">রেফারেন্স</div>
+        </div>
+        <span class="step-number-badge">Step 9 / 10</span>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-icon">👥</div>
+        <div>Provide at least <strong>2 professional references</strong>. References should be people who know you professionally — preferably former supervisors, senior colleagues, or respected academics.</div>
+      </div>
+
+      <div class="repeatable-list" id="referenceList">
+        <!-- Populated by JS -->
+      </div>
+
+      <button class="btn-add-item" onclick="addReference()">
+        ＋ Add Reference
+      </button>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Step <strong>9</strong> of <strong>10</strong></div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(9)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-primary" onclick="nextStep(9)">Next <span class="btn-icon">→</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       STEP 10: DECLARATION
+       ==================================================== -->
+  <div class="step-panel" data-step="10" id="step10">
+    <div class="form-card">
+      <div class="section-header">
+        <div class="section-icon">📝</div>
+        <div>
+          <div class="section-title">Declaration & Submission</div>
+          <div class="section-subtitle">ঘোষণাপত্র</div>
+        </div>
+        <span class="step-number-badge">Step 10 / 10</span>
+      </div>
+
+      <div class="info-box" style="border-color:rgba(251,191,36,0.4); background:rgba(251,191,36,0.08);">
+        <div class="info-box-icon">⚠️</div>
+        <div style="color:#fbbf24;">Please read the following declarations carefully before submitting your application. All statements must be acknowledged.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:24px;">
+        <div class="declaration-checkbox">
+          <input type="checkbox" id="decl1" />
+          <label for="decl1">I hereby confirm that all information provided in this application form is true, complete, and accurate to the best of my knowledge. I understand that any false or misleading information may result in immediate disqualification or termination.</label>
+        </div>
+        <div class="declaration-checkbox">
+          <input type="checkbox" id="decl2" />
+          <label for="decl2">I agree that the institution has the right to verify all information provided in this application, including contacting previous employers, educational institutions, and references listed herein.</label>
+        </div>
+        <div class="declaration-checkbox">
+          <input type="checkbox" id="decl3" />
+          <label for="decl3">I understand that submission of false information, misrepresentation of qualifications, or fraudulent documents may result in permanent cancellation of my application and possible legal consequences.</label>
+        </div>
+      </div>
+      <div class="error-msg" id="err-declarations" style="margin-bottom:12px;"></div>
+
+      <div class="form-grid grid-2">
+        <div class="field-group">
+          <div class="field-label">Applicant Signature (Draw) <span class="required">*</span></div>
+          <div class="signature-canvas-wrap">
+            <canvas id="signatureCanvas" width="400" height="100"></canvas>
+          </div>
+          <div class="sig-controls">
+            <button class="btn-sm" onclick="clearSignature()">Clear</button>
+            <span id="sigStatus" style="font-size:11px; color:var(--text-muted); align-self:center; margin-left:4px;">Draw your signature above</span>
+          </div>
+          <div class="error-msg" id="err-signature">Signature is required.</div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Date of Submission <span class="required">*</span></div>
+          <input type="date" class="field-input" id="submissionDate" required />
+          <div class="error-msg" id="err-submissionDate">Submission date is required.</div>
+          <div style="margin-top:16px;">
+            <div class="field-label" style="margin-bottom:8px;">Application Summary</div>
+            <div style="font-size:12px; color:var(--text-secondary); line-height:1.8;">
+              <div id="summaryApplicant">—</div>
+              <div id="summaryPost">—</div>
+              <div id="summaryDate">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-nav">
+        <div class="nav-step-info">Final step — review and submit</div>
+        <div class="nav-buttons">
+          <button class="btn btn-secondary" onclick="prevStep(10)"><span class="btn-icon">←</span> Previous</button>
+          <button class="btn btn-submit" onclick="submitForm()">Submit Application ✓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SUCCESS PANEL ========== -->
+  <div class="success-panel" id="successPanel">
+    <div class="success-icon">✓</div>
+    <h2>Application Submitted!</h2>
+    <p>Your teacher application has been successfully received.<br>
+    The administration team will review your application and contact you within 7–10 working days.</p>
+    <div class="app-ref" id="appRefNo">APP-REF: ——————</div>
+    <p style="margin-top:16px;">Please keep this reference number for future correspondence.</p>
+  </div>
+
+</div><!-- /#teacher-application-form -->
+
+<script>
+/* ============================================================
+   TEACHER APPLICATION FORM — JAVASCRIPT
+   Bangladesh High School Management System
+   ============================================================ */
+
+// ─── STATE ───────────────────────────────────────────────────
+let currentStep = 1;
+const TOTAL_STEPS = 10;
+let qualificationCount = 0;
+let experienceCount    = 0;
+let referenceCount     = 0;
+let signatureDrawn     = false;
+
+// Signature canvas state
+let sigCanvas, sigCtx, sigDrawing = false, sigLastX, sigLastY;
+
+// ─── STEP METADATA ───────────────────────────────────────────
+const stepMeta = [
+  { label: "Identity"     },
+  { label: "Contact"      },
+  { label: "Academics"    },
+  { label: "Professional" },
+  { label: "Experience"   },
+  { label: "Suitability"  },
+  { label: "Background"   },
+  { label: "Documents"    },
+  { label: "References"   },
+  { label: "Declaration"  }
+];
+
+// ─── INIT ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildStepTracker();
+  toggleOtherSubjectField();
+  buildQualificationList();
+  buildExperienceList();
+  buildReferenceList();
+  initSignatureCanvas();
+  initRelativesToggle();
+  // Pre-fill today's date for submission
+  document.getElementById('submissionDate').valueAsDate = new Date();
+  updateProgress();
+});
+
+// ─── STEP TRACKER BUILD ───────────────────────────────────────
+function buildStepTracker() {
+  const container = document.getElementById('stepTrackerInner');
+  container.innerHTML = '';
+  stepMeta.forEach((s, i) => {
+    const n = i + 1;
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (n === 1 ? ' active' : '');
+    dot.dataset.step = n;
+    dot.innerHTML = `
+      <div class="step-dot-circle"><span>${n}</span></div>
+      <div class="step-dot-label">${s.label}</div>`;
+    dot.addEventListener('click', () => jumpToStep(n));
+    container.appendChild(dot);
+
+    if (n < TOTAL_STEPS) {
+      const connector = document.createElement('div');
+      connector.className = 'step-connector';
+      connector.id = `connector-${n}`;
+      container.appendChild(connector);
+    }
+  });
+}
+
+// ─── UPDATE TRACKER STATE ─────────────────────────────────────
+function updateStepTracker(step) {
+  document.querySelectorAll('.step-dot').forEach(dot => {
+    const n = parseInt(dot.dataset.step);
+    dot.classList.remove('active', 'completed');
+    if (n === step) dot.classList.add('active');
+    else if (n < step) dot.classList.add('completed');
+  });
+
+  for (let i = 1; i < TOTAL_STEPS; i++) {
+    const el = document.getElementById(`connector-${i}`);
+    if (el) el.classList.toggle('done', i < step);
+  }
+}
+
+// ─── UPDATE PROGRESS BAR ──────────────────────────────────────
+function updateProgress() {
+  const pct = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
+  document.getElementById('progressBar').style.width = Math.max(5, pct) + '%';
+  updateStepTracker(currentStep);
+}
+
+// ─── SHOW STEP (with animation direction) ────────────────────
+function showStep(next, direction) {
+  const currentPanel = document.querySelector('.step-panel.active');
+  const nextPanel = document.getElementById(`step${next}`);
+
+  if (!nextPanel || currentPanel === nextPanel) return;
+
+  // Animate out
+  const outClass = direction === 'forward' ? 'slide-out-left' : 'slide-out-right';
+  currentPanel.classList.add(outClass);
+
+  setTimeout(() => {
+    currentPanel.classList.remove('active', 'slide-out-left', 'slide-out-right');
+
+    // Animate in
+    const inClass = direction === 'forward' ? 'slide-in-right' : 'slide-in-left';
+    nextPanel.classList.add('active', inClass);
+    setTimeout(() => nextPanel.classList.remove('slide-in-right', 'slide-in-left'), 450);
+
+    // Update summary on declaration step
+    if (next === 10) populateDeclarationSummary();
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 300);
+}
+
+// ─── NAVIGATE FORWARD ────────────────────────────────────────
+function nextStep(fromStep) {
+  if (!validateStep(fromStep)) return;
+  currentStep = fromStep + 1;
+  showStep(currentStep, 'forward');
+  updateProgress();
+}
+
+// ─── NAVIGATE BACKWARD ───────────────────────────────────────
+function prevStep(fromStep) {
+  currentStep = fromStep - 1;
+  showStep(currentStep, 'backward');
+  updateProgress();
+}
+
+// ─── JUMP (from tracker) ─────────────────────────────────────
+function jumpToStep(n) {
+  if (n === currentStep) return;
+  // Only allow jumping to completed steps or current+1
+  if (n > currentStep + 1) return;
+  const dir = n > currentStep ? 'forward' : 'backward';
+  currentStep = n;
+  showStep(currentStep, dir);
+  updateProgress();
+}
+
+// ─── VALIDATION PER STEP ────────────────────────────────────
+function validateStep(step) {
+  clearErrors();
+  let valid = true;
+
+  if (step === 1) {
+    valid = requireField('fullNameEn')  & valid;
+    valid = requireField('fullNameBn')  & valid;
+    valid = requireField('fatherName')  & valid;
+    valid = requireField('motherName')  & valid;
+    valid = requireField('dob')         & valid;
+    valid = requireField('gender')      & valid;
+    valid = requireField('maritalStatus') & valid;
+    valid = requireField('nationality') & valid;
+    valid = requireField('nidNumber')   & valid;
+  }
+
+  if (step === 2) {
+    valid = requireField('mobileNo')    & valid;
+    valid = requireEmail('emailAddr')   & valid;
+    valid = requireField('presentAddr') & valid;
+    valid = requireField('permanentAddr') & valid;
+    valid = requireField('district')    & valid;
+    valid = requireField('thana')       & valid;
+    valid = requireField('applyingPost') & valid;
+    valid = requireField('subject')     & valid;
+    if ((document.getElementById('subject')?.value || '') === 'Other') valid = requireField('otherSubjectName') & valid;
+    valid = requireRadio('teachingLevel', 'err-teachingLevel', 'Teaching level is required.') & valid;
+    valid = requireField('joiningDate') & valid;
+    valid = requireRadio('employmentType', 'err-employmentType', 'Employment type is required.') & valid;
+  }
+
+  if (step === 3) {
+    // At least one qualification
+    const items = document.querySelectorAll('#qualificationList .repeatable-item');
+    if (items.length === 0) {
+      alert('Please add at least one academic qualification.');
+      valid = false;
+    } else {
+      items.forEach((item, idx) => {
+        const n = item.dataset.index;
+        const examName = item.querySelector(`#qual_examName_${n}`);
+        if (examName && !examName.value.trim()) {
+          markError(examName);
+          valid = false;
+        }
+      });
+    }
+  }
+
+  if (step === 4) {
+    valid = requireField('ntrcaStatus') & valid;
+  }
+
+  if (step === 6) {
+    valid = requireField('preferredSubjects') & valid;
+    // At least one class range
+    const checked = document.querySelectorAll('input[name="classRange"]:checked');
+    if (checked.length === 0) {
+      document.getElementById('err-classRange').classList.add('visible');
+      valid = false;
+    }
+  }
+
+  if (step === 7) {
+    valid = requireField('emergencyName')     & valid;
+    valid = requireField('emergencyNumber')   & valid;
+    valid = requireField('emergencyRelation') & valid;
+  }
+
+  if (step === 8) {
+    valid = requireFile('docPhoto',     'err-docPhoto')    & valid;
+    valid = requireFile('docNID',       'err-docNID')      & valid;
+    valid = requireFile('docCerts',     'err-docCerts')    & valid;
+    valid = requireFile('docSignature', 'err-docSignature') & valid;
+  }
+
+  if (step === 9) {
+    // At least 2 references
+    const refs = document.querySelectorAll('#referenceList .repeatable-item');
+    if (refs.length < 2) {
+      alert('Please provide at least 2 references.');
+      valid = false;
+    } else {
+      refs.forEach(ref => {
+        const n = ref.dataset.index;
+        const nameEl = ref.querySelector(`#ref_name_${n}`);
+        if (nameEl && !nameEl.value.trim()) {
+          markError(nameEl);
+          valid = false;
+        }
+      });
+    }
+  }
+
+  return !!valid;
+}
+
+// ─── VALIDATION HELPERS ──────────────────────────────────────
+function requireField(id) {
+  const el = document.getElementById(id);
+  if (!el) return true;
+  if (!el.value.trim()) {
+    markError(el);
+    return false;
+  }
+  return true;
+}
+
+function requireEmail(id) {
+  const el = document.getElementById(id);
+  if (!el) return true;
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!re.test(el.value.trim())) {
+    markError(el);
+    showError('err-' + id, 'Valid email address is required.');
+    return false;
+  }
+  return true;
+}
+
+function requireRadio(name, errId, msg) {
+  const checked = document.querySelector(`input[name="${name}"]:checked`);
+  if (!checked) {
+    const errEl = document.getElementById(errId);
+    if (errEl) { errEl.textContent = msg; errEl.classList.add('visible'); }
+    return false;
+  }
+  return true;
+}
+
+function requireFile(id, errId) {
+  const el = document.getElementById(id);
+  if (!el || !el.files || el.files.length === 0) {
+    const errEl = document.getElementById(errId);
+    if (errEl) errEl.classList.add('visible');
+    return false;
+  }
+  return true;
+}
+
+function markError(el) {
+  el.classList.add('error');
+  const errEl = document.getElementById('err-' + el.id);
+  if (errEl) errEl.classList.add('visible');
+}
+
+function showError(errId, msg) {
+  const el = document.getElementById(errId);
+  if (el) { el.textContent = msg; el.classList.add('visible'); }
+}
+
+function clearErrors() {
+  document.querySelectorAll('.error-msg.visible').forEach(el => el.classList.remove('visible'));
+  document.querySelectorAll('.field-input.error').forEach(el => el.classList.remove('error'));
+}
+
+// Clear error on input
+document.addEventListener('input', e => {
+  if (e.target.classList.contains('field-input')) {
+    e.target.classList.remove('error');
+    const errEl = document.getElementById('err-' + e.target.id);
+    if (errEl) errEl.classList.remove('visible');
+  }
+});
+
+// ─── PHOTO PREVIEW ───────────────────────────────────────────
+function previewPhoto(input) {
+  const file = input.files[0];
+  const img = document.getElementById('photoPreview');
+  const placeholder = document.getElementById('photoPlaceholder');
+  const infoBox = document.getElementById('photoInfoBox');
+  if (!file) {
+    img.src = '';
+    img.style.display = 'none';
+    placeholder.style.display = 'flex';
+    if (infoBox) infoBox.classList.remove('hidden');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    img.src = e.target.result;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    if (infoBox) infoBox.classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─── FILE NAME DISPLAY ───────────────────────────────────────
+function showFileName(input, displayId) {
+  const el = document.getElementById(displayId);
+  if (!el) return;
+  if (input.files.length === 0) { el.textContent = ''; return; }
+  if (input.files.length === 1) {
+    el.textContent = '✓ ' + input.files[0].name;
+  } else {
+    el.textContent = `✓ ${input.files.length} files selected`;
+  }
+}
+
+// ─── ACADEMIC QUALIFICATION ROWS ─────────────────────────────
+function addQualification(data = {}) {
+  qualificationCount++;
+  const n = qualificationCount;
+  const container = document.getElementById('qualificationList');
+
+  const item = document.createElement('div');
+  item.className = 'repeatable-item';
+  item.dataset.index = n;
+  item.innerHTML = `
+    <div class="repeatable-item-header">
+      <div class="repeatable-item-title">Qualification #${n}</div>
+      ${n > 1 ? `<button class="btn-remove-item" onclick="removeItem(this)" title="Remove">×</button>` : ''}
+    </div>
+    <div class="form-grid">
+      <div class="field-group">
+        <div class="field-label">Exam / Degree Name <span class="required">*</span></div>
+        <select class="field-input" id="qual_examName_${n}">
+          <option value="">Select Degree</option>
+          <option>SSC</option><option>HSC</option><option>Dakhil</option>
+          <option>Alim</option><option>Fazil</option><option>Kamil</option>
+          <option>Diploma</option><option>Honours / B.A. / B.Sc. / B.Com</option>
+          <option>Masters / M.A. / M.Sc. / M.Com</option>
+          <option>B.Ed</option><option>M.Ed</option><option>Ph.D</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Group / Subject</div>
+        <input type="text" class="field-input" id="qual_group_${n}" placeholder="e.g. Science, Arts, Mathematics" value="${data.group||''}" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Board / University</div>
+        <input type="text" class="field-input" id="qual_board_${n}" placeholder="Board or University name" value="${data.board||''}" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Institution Name</div>
+        <input type="text" class="field-input" id="qual_institution_${n}" placeholder="School / College / University" value="${data.institution||''}" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Passing Year</div>
+        <input type="number" class="field-input" id="qual_year_${n}" placeholder="e.g. 2015" min="1970" max="2030" value="${data.year||''}" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Result / GPA / CGPA</div>
+        <input type="text" class="field-input" id="qual_result_${n}" placeholder="e.g. GPA 5.00 / A+ / Division 1" value="${data.result||''}" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Out Of</div>
+        <input type="text" class="field-input" id="qual_outof_${n}" placeholder="e.g. 5.00 / 4.00 / 800" value="${data.outof||''}" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Duration</div>
+        <input type="text" class="field-input" id="qual_duration_${n}" placeholder="e.g. 2 years / 4 semesters" value="${data.duration||''}" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Certificate Upload</div>
+        <div class="file-upload-area" style="padding:12px;">
+          <input type="file" id="qual_cert_${n}" accept=".pdf,image/*" onchange="showFileName(this, 'qual_cert_fn_${n}')" />
+          <div class="file-upload-label">
+            <div class="file-upload-icon" style="font-size:18px;">📎</div>
+            <div class="file-upload-text" style="font-size:11px;">Browse file</div>
+          </div>
+          <div class="file-name-display" id="qual_cert_fn_${n}"></div>
+        </div>
+      </div>
+    </div>`;
+
+  container.appendChild(item);
+
+  // Set select value if provided
+  if (data.examName) {
+    const sel = item.querySelector(`#qual_examName_${n}`);
+    if (sel) sel.value = data.examName;
+  }
+}
+
+function toggleOtherSubjectField() {
+  const subjectEl = document.getElementById('subject');
+  const otherWrap = document.getElementById('otherSubjectGroup');
+  const otherInput = document.getElementById('otherSubjectName');
+  if (!subjectEl || !otherWrap || !otherInput) return;
+  const isOther = subjectEl.value === 'Other';
+  otherWrap.style.display = isOther ? 'flex' : 'none';
+  otherInput.required = isOther;
+  if (!isOther) {
+    otherInput.value = '';
+    otherInput.classList.remove('error');
+    const err = document.getElementById('err-otherSubjectName');
+    if (err) err.classList.remove('visible');
+  }
+}
+
+
+function buildQualificationList() {
+  // Start with 2 default rows (SSC + HSC)
+  addQualification({ examName: 'SSC' });
+  addQualification({ examName: 'HSC' });
+}
+
+// ─── TEACHING EXPERIENCE ROWS ────────────────────────────────
+function addExperience(data = {}) {
+  experienceCount++;
+  const n = experienceCount;
+  const container = document.getElementById('experienceList');
+
+  const item = document.createElement('div');
+  item.className = 'repeatable-item';
+  item.dataset.index = n;
+  item.innerHTML = `
+    <div class="repeatable-item-header">
+      <div class="repeatable-item-title">Experience #${n}</div>
+      <button class="btn-remove-item" onclick="removeItem(this)" title="Remove">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="field-group">
+        <div class="field-label">Institution Name</div>
+        <input type="text" class="field-input" id="exp_inst_${n}" placeholder="School / College name" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Institution Type</div>
+        <select class="field-input" id="exp_instType_${n}">
+          <option value="">Select Type</option>
+          <option>Govt. School</option><option>Non-Govt. School</option>
+          <option>Govt. College</option><option>Non-Govt. College</option>
+          <option>Madrasha</option><option>Technical Institute</option>
+          <option>Private School / College</option><option>International School</option>
+          <option>NGO / Development</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Subject Taught</div>
+        <input type="text" class="field-input" id="exp_subject_${n}" placeholder="e.g. Physics, Mathematics" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Class Range Taught</div>
+        <input type="text" class="field-input" id="exp_classRange_${n}" placeholder="e.g. Class 9–12" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Serving / Total Time</div>
+        <input type="text" class="field-input" id="exp_servingTime_${n}" placeholder="e.g. 3 years 6 months" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Currently Working Here?</div>
+        <div class="toggle-pill">
+          <input type="radio" name="exp_current_${n}" id="exp_cw_y_${n}" value="Yes" />
+          <label for="exp_cw_y_${n}">Yes</label>
+          <input type="radio" name="exp_current_${n}" id="exp_cw_n_${n}" value="No" checked />
+          <label for="exp_cw_n_${n}">No</label>
+        </div>
+      </div>
+      <div class="field-group field-full">
+        <div class="field-label">Reason for Leaving</div>
+        <input type="text" class="field-input" id="exp_reason_${n}" placeholder="e.g. Better opportunity, Contract ended" />
+      </div>
+    </div>`;
+
+  container.appendChild(item);
+}
+
+function buildExperienceList() {
+  // Start with one empty experience row
+  addExperience();
+}
+
+// ─── REFERENCE ROWS ───────────────────────────────────────────
+function addReference(data = {}) {
+  referenceCount++;
+  const n = referenceCount;
+  const container = document.getElementById('referenceList');
+
+  const item = document.createElement('div');
+  item.className = 'repeatable-item';
+  item.dataset.index = n;
+  item.innerHTML = `
+    <div class="repeatable-item-header">
+      <div class="repeatable-item-title">Reference #${n}</div>
+      ${n > 2 ? `<button class="btn-remove-item" onclick="removeItem(this)" title="Remove">×</button>` : ''}
+    </div>
+    <div class="form-grid">
+      <div class="field-group">
+        <div class="field-label">Reference Name <span class="required">*</span></div>
+        <input type="text" class="field-input" id="ref_name_${n}" placeholder="Full name" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Designation</div>
+        <input type="text" class="field-input" id="ref_designation_${n}" placeholder="e.g. Headmaster, Professor" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Institution</div>
+        <input type="text" class="field-input" id="ref_institution_${n}" placeholder="Current workplace" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Mobile Number</div>
+        <input type="tel" class="field-input" id="ref_mobile_${n}" placeholder="+880 1X-XXXX-XXXX" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Email Address</div>
+        <input type="email" class="field-input" id="ref_email_${n}" placeholder="email@example.com" />
+      </div>
+      <div class="field-group">
+        <div class="field-label">Relationship with Applicant</div>
+        <select class="field-input" id="ref_relation_${n}">
+          <option value="">Select Relation</option>
+          <option>Former Supervisor</option><option>Senior Colleague</option>
+          <option>Former Teacher / Professor</option><option>Academic Advisor</option>
+          <option>Professional Colleague</option><option>Other</option>
+        </select>
+      </div>
+    </div>`;
+
+  container.appendChild(item);
+}
+
+function buildReferenceList() {
+  // Add 2 default reference blocks
+  addReference();
+  addReference();
+}
+
+// ─── GENERIC REMOVE ROW ──────────────────────────────────────
+function removeItem(btn) {
+  const item = btn.closest('.repeatable-item');
+  if (item) {
+    item.style.opacity = '0';
+    item.style.transform = 'translateX(-20px)';
+    item.style.transition = 'all 0.25s ease';
+    setTimeout(() => item.remove(), 250);
+  }
+}
+
+// ─── RELATIVES TOGGLE ─────────────────────────────────────────
+function initRelativesToggle() {
+  document.querySelectorAll('input[name="relativesHere"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const wrap = document.getElementById('relativeDetailWrap');
+      if (wrap) wrap.style.display = radio.value === 'Yes' && radio.checked ? 'flex' : 'none';
+    });
+  });
+}
+
+// ─── SIGNATURE CANVAS ────────────────────────────────────────
+function initSignatureCanvas() {
+  sigCanvas = document.getElementById('signatureCanvas');
+  if (!sigCanvas) return;
+  sigCtx = sigCanvas.getContext('2d');
+  sigCtx.strokeStyle = '#00d4c8';
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+
+  // Mouse events
+  sigCanvas.addEventListener('mousedown', e => {
+    sigDrawing = true;
+    const pos = getPos(e, sigCanvas);
+    sigLastX = pos.x; sigLastY = pos.y;
+    sigCtx.beginPath();
+    sigCtx.moveTo(sigLastX, sigLastY);
+  });
+
+  sigCanvas.addEventListener('mousemove', e => {
+    if (!sigDrawing) return;
+    const pos = getPos(e, sigCanvas);
+    sigCtx.lineTo(pos.x, pos.y);
+    sigCtx.stroke();
+    sigLastX = pos.x; sigLastY = pos.y;
+    markSignatureDrawn();
+  });
+
+  sigCanvas.addEventListener('mouseup', () => { sigDrawing = false; });
+  sigCanvas.addEventListener('mouseleave', () => { sigDrawing = false; });
+
+  // Touch events
+  sigCanvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    sigDrawing = true;
+    const pos = getPos(e.touches[0], sigCanvas);
+    sigLastX = pos.x; sigLastY = pos.y;
+    sigCtx.beginPath();
+    sigCtx.moveTo(sigLastX, sigLastY);
+  }, { passive: false });
+
+  sigCanvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!sigDrawing) return;
+    const pos = getPos(e.touches[0], sigCanvas);
+    sigCtx.lineTo(pos.x, pos.y);
+    sigCtx.stroke();
+    sigLastX = pos.x; sigLastY = pos.y;
+    markSignatureDrawn();
+  }, { passive: false });
+
+  sigCanvas.addEventListener('touchend', () => { sigDrawing = false; });
+}
+
+function getPos(e, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
+}
+
+function markSignatureDrawn() {
+  if (!signatureDrawn) {
+    signatureDrawn = true;
+    const status = document.getElementById('sigStatus');
+    if (status) status.textContent = '✓ Signature drawn';
+    status.style.color = 'var(--success)';
+  }
+}
+
+function clearSignature() {
+  if (!sigCtx) return;
+  sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+  signatureDrawn = false;
+  const status = document.getElementById('sigStatus');
+  if (status) { status.textContent = 'Draw your signature above'; status.style.color = ''; }
+}
+
+// ─── DECLARATION SUMMARY ──────────────────────────────────────
+function populateDeclarationSummary() {
+  const name = document.getElementById('fullNameEn')?.value || '—';
+  const post = document.getElementById('applyingPost')?.value || '—';
+  const subjectSelect = document.getElementById('subject')?.value || '';
+  const subject = subjectSelect === 'Other' ? (document.getElementById('otherSubjectName')?.value || 'Other') : (subjectSelect || '—');
+  document.getElementById('summaryApplicant').textContent = `Applicant: ${name}`;
+  document.getElementById('summaryPost').textContent = `Applying for: ${post} — ${subject}`;
+  document.getElementById('summaryDate').textContent = `Date: ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' })}`;
+}
+
+// ─── FINAL SUBMIT ─────────────────────────────────────────────
+function submitForm() {
+  clearErrors();
+  let valid = true;
+
+  // Validate declarations
+  const decls = ['decl1','decl2','decl3'];
+  const unchecked = decls.filter(id => !document.getElementById(id)?.checked);
+  if (unchecked.length > 0) {
+    const errEl = document.getElementById('err-declarations');
+    if (errEl) {
+      errEl.textContent = 'Please acknowledge all declaration statements above.';
+      errEl.classList.add('visible');
+    }
+    valid = false;
+  }
+
+  // Validate signature
+  if (!signatureDrawn) {
+    document.getElementById('err-signature')?.classList.add('visible');
+    valid = false;
+  }
+
+  // Validate submission date
+  valid = requireField('submissionDate') & valid;
+
+  if (!valid) return;
+
+  // Collect all form data
+  const formData = collectFormData();
+  console.log('[Teacher Application] Submitted Data:', formData);
+
+  // Generate reference number
+  const refNo = 'APP-' + Date.now().toString(36).toUpperCase() + '-BD';
+  document.getElementById('appRefNo').textContent = 'APP-REF: ' + refNo;
+
+  // Hide all steps, show success
+  document.querySelectorAll('.step-panel.active').forEach(p => p.classList.remove('active'));
+  document.querySelector('.step-tracker').style.display = 'none';
+  document.querySelector('.progress-bar-wrap').style.display = 'none';
+  document.getElementById('successPanel').classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── COLLECT ALL FORM DATA ───────────────────────────────────
+function collectFormData() {
+  // Step 1 — Basic Identity
+  const identity = {
+    fullNameEn:   val('fullNameEn'),
+    fullNameBn:   val('fullNameBn'),
+    fatherName:   val('fatherName'),
+    motherName:   val('motherName'),
+    dob:          val('dob'),
+    gender:       val('gender'),
+    maritalStatus:val('maritalStatus'),
+    nationality:  val('nationality'),
+    religion:     val('religion'),
+    nidNumber:    val('nidNumber'),
+    birthRegNo:   val('birthRegNo'),
+    passportNo:   val('passportNo')
+  };
+
+  // Step 2 — Contact + Job
+  const contact = {
+    mobileNo:     val('mobileNo'),
+    altMobileNo:  val('altMobileNo'),
+    emailAddr:    val('emailAddr'),
+    presentAddr:  val('presentAddr'),
+    permanentAddr:val('permanentAddr'),
+    district:     val('district'),
+    thana:        val('thana'),
+    postCode:     val('postCode')
+  };
+
+  const jobDetails = {
+    applyingPost:   val('applyingPost'),
+    subject:        ((val('subject') === 'Other') ? val('otherSubjectName') : val('subject')),
+    teachingLevel:  radioVal('teachingLevel'),
+    joiningDate:    val('joiningDate'),
+    employmentType: radioVal('employmentType')
+  };
+
+  // Step 3 — Academic Qualifications
+  const qualifications = [];
+  document.querySelectorAll('#qualificationList .repeatable-item').forEach(item => {
+    const n = item.dataset.index;
+    qualifications.push({
+      examName:    item.querySelector(`#qual_examName_${n}`)?.value || '',
+      group:       item.querySelector(`#qual_group_${n}`)?.value || '',
+      board:       item.querySelector(`#qual_board_${n}`)?.value || '',
+      institution: item.querySelector(`#qual_institution_${n}`)?.value || '',
+      year:        item.querySelector(`#qual_year_${n}`)?.value || '',
+      result:      item.querySelector(`#qual_result_${n}`)?.value || '',
+      outof:       item.querySelector(`#qual_outof_${n}`)?.value || '',
+      duration:    item.querySelector(`#qual_duration_${n}`)?.value || ''
+    });
+  });
+
+  // Step 4 — Professional
+  const professional = {
+    bedMed:           val('bedMed'),
+    ntrcaStatus:      val('ntrcaStatus'),
+    ntrcaCertNo:      val('ntrcaCertNo'),
+    ntrcaLevel:       radioVal('ntrcaLevel'),
+    mpoExp:           radioVal('mpoExp'),
+    teachLicense:     val('teachLicense'),
+    computerSkills:   val('computerSkills'),
+    englishLevel:     val('englishLevel'),
+    trainingReceived: val('trainingReceived')
+  };
+
+  // Step 5 — Experience
+  const experience = [];
+  document.querySelectorAll('#experienceList .repeatable-item').forEach(item => {
+    const n = item.dataset.index;
+    experience.push({
+      institution:  item.querySelector(`#exp_inst_${n}`)?.value || '',
+      instType:     item.querySelector(`#exp_instType_${n}`)?.value || '',
+      subject:      item.querySelector(`#exp_subject_${n}`)?.value || '',
+      classRange:   item.querySelector(`#exp_classRange_${n}`)?.value || '',
+      servingTime:  item.querySelector(`#exp_servingTime_${n}`)?.value || '',
+      currentlyWorking: radioVal(`exp_current_${n}`),
+      reasonLeaving:item.querySelector(`#exp_reason_${n}`)?.value || ''
+    });
+  });
+
+  // Step 6 — Suitability + Skills
+  const suitability = {
+    preferredSubjects:  val('preferredSubjects'),
+    additionalSubjects: val('additionalSubjects'),
+    classRange: Array.from(document.querySelectorAll('input[name="classRange"]:checked')).map(el => el.value),
+    coachingInvolved:   radioVal('coachingInvolved'),
+    examInvig:          radioVal('examInvig'),
+    classTeacher:       radioVal('classTeacher'),
+    coCurricular:       radioVal('coCurricular'),
+    ictSkills:          val('ictSkills'),
+    spokenEnglish:      val('spokenEnglish'),
+    softwareSkills: Array.from(document.querySelectorAll('.skills-grid input:checked')).map(el => el.value)
+  };
+
+  // Step 7 — Background
+  const background = {
+    bloodGroup:          val('bloodGroup'),
+    physicalDisability:  val('physicalDisability'),
+    relativesHere:       radioVal('relativesHere'),
+    relativeDetail:      val('relativeDetail'),
+    emergencyName:       val('emergencyName'),
+    emergencyNumber:     val('emergencyNumber'),
+    emergencyRelation:   val('emergencyRelation')
+  };
+
+  // Step 9 — References
+  const references = [];
+  document.querySelectorAll('#referenceList .repeatable-item').forEach(item => {
+    const n = item.dataset.index;
+    references.push({
+      name:        item.querySelector(`#ref_name_${n}`)?.value || '',
+      designation: item.querySelector(`#ref_designation_${n}`)?.value || '',
+      institution: item.querySelector(`#ref_institution_${n}`)?.value || '',
+      mobile:      item.querySelector(`#ref_mobile_${n}`)?.value || '',
+      email:       item.querySelector(`#ref_email_${n}`)?.value || '',
+      relation:    item.querySelector(`#ref_relation_${n}`)?.value || ''
+    });
+  });
+
+  // Step 10 — Declaration
+  const declaration = {
+    decl1:          document.getElementById('decl1')?.checked,
+    decl2:          document.getElementById('decl2')?.checked,
+    decl3:          document.getElementById('decl3')?.checked,
+    signatureDrawn: signatureDrawn,
+    submissionDate: val('submissionDate')
+  };
+
+  return {
+    meta:          { submittedAt: new Date().toISOString(), formVersion: '1.0' },
+    identity,
+    contact,
+    jobDetails,
+    qualifications,
+    professional,
+    experience,
+    suitability,
+    background,
+    references,
+    declaration
+  };
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────
+function val(id) {
+  return document.getElementById(id)?.value?.trim() || '';
+}
+
+function radioVal(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ভর্তি আবেদন · Admission Application</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0a0e1a;--surface:#0f1524;--surface2:#141b2d;--border:#1c2540;--border2:#242e4a;--text:#e2e4ea;--muted:#6a7194;--muted2:#444d6e;--accent:#5c6ef8;--green:#5cf8a0;--red:#f85c5c;--amber:#f8c05c;--input-bg:#0d1220}
+    *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;line-height:1.6;min-height:100vh}
+    .fc{max-width:740px;margin:0 auto;padding:40px 24px 60px}.fh{text-align:center;margin-bottom:36px}
+    .fb{display:inline-block;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--accent);background:rgba(92,110,248,.08);border:1px solid rgba(92,110,248,.2);padding:5px 14px;border-radius:3px;margin-bottom:16px}
+    .ft{font-family:'Cormorant Garamond','DM Serif Display',serif;font-size:32px;color:var(--text);margin-bottom:8px}
+    .fs{font-size:11px;color:var(--muted);letter-spacing:.04em;line-height:1.8}
+    .sec{margin-bottom:28px;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+    .st{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--accent);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    .fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .f label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .f label .bn{font-family:sans-serif;font-size:12px;letter-spacing:0;text-transform:none}
+    .f input,.f select,.f textarea{width:100%;padding:11px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s}
+    .f input:focus,.f select:focus,.f textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(92,110,248,.12)}
+    .f textarea{min-height:70px;resize:vertical}.fm{font-size:10px;color:var(--red);margin-top:4px;min-height:14px}
+    .fh2{font-size:9px;color:var(--muted2);margin-top:3px;font-family:sans-serif}.req{color:var(--red)}
+    .pa{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+    .pp{width:90px;height:90px;border-radius:8px;background:var(--surface2);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0}
+    .pp img{width:100%;height:100%;object-fit:cover}
+    .bp{font-size:10px;padding:6px 14px;background:rgba(92,110,248,.08);border:1px solid rgba(92,110,248,.25);color:var(--accent);border-radius:4px;cursor:pointer;margin-top:8px}
+    .br{font-size:10px;padding:6px 14px;background:rgba(248,92,92,.08);border:1px solid rgba(248,92,92,.2);color:var(--red);border-radius:4px;cursor:pointer;margin-top:8px;margin-left:6px;display:none}
+    .fa{display:flex;gap:12px;justify-content:center;margin-top:32px;flex-wrap:wrap}
+    .bsub{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:14px 36px;background:linear-gradient(135deg,#5c6ef8,#4a5ce0);border:none;color:#fff;border-radius:8px;cursor:pointer;transition:all .2s}
+    .bclr{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:14px 36px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;cursor:pointer}
+    .ss{display:none;text-align:center;padding:60px 20px}.ss.show{display:block}
+    .si{width:70px;height:70px;border-radius:50%;background:rgba(92,248,160,.08);border:1px solid rgba(92,248,160,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+    .phi{display:flex;align-items:center;gap:6px;margin-top:4px;min-height:18px;font-size:12px}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:11px;color:var(--text);opacity:0;transition:opacity .3s;z-index:999;pointer-events:none}.toast.show{opacity:1}
+    @media(max-width:600px){.fg{grid-template-columns:1fr}.fc{padding:20px 14px 40px}.ft{font-size:24px}}
+  </style>
+</head>
+<body>
+
+<!-- ══ LANDING PAGE — Choose Apply or Check Status ══ -->
+<div id="landingPage" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="max-width:500px;width:100%;text-align:center;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--text);margin-bottom:6px;">ভর্তি আবেদন</div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:.1em;margin-bottom:40px;">Admission Application Portal</div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <!-- Apply Online -->
+      <div onclick="showApplyForm()" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 24px;cursor:pointer;transition:all .25s;text-align:left;" onmouseover="this.style.borderColor='rgba(92,110,248,.5)';this.style.background='rgba(92,110,248,.04)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(92,110,248,.1);border:1px solid rgba(92,110,248,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg fill="none" stroke="#5c6ef8" stroke-width="1.4" viewBox="0 0 24 24" width="22" height="22"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          </div>
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text);">অনলাইনে আবেদন করুন</div>
+            <div style="font-size:11px;color:var(--accent);letter-spacing:.06em;">Apply Online</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;padding-left:58px;">নতুন শিক্ষার্থী ভর্তির জন্য আবেদন ফর্ম পূরণ করুন।<br><span style="color:var(--muted2);">Fill out the admission application form for a new student.</span></div>
+      </div>
+
+      <!-- Check Status -->
+      <div onclick="showStatusCheck()" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 24px;cursor:pointer;transition:all .25s;text-align:left;" onmouseover="this.style.borderColor='rgba(248,192,92,.5)';this.style.background='rgba(248,192,92,.04)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(248,192,92,.1);border:1px solid rgba(248,192,92,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg fill="none" stroke="#f8c05c" stroke-width="1.4" viewBox="0 0 24 24" width="22" height="22"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5l4 4"/></svg>
+          </div>
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text);">আবেদনের অবস্থা যাচাই</div>
+            <div style="font-size:11px;color:var(--amber);letter-spacing:.06em;">Check Application Status</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;padding-left:58px;">আপনার আবেদন আইডি দিয়ে আবেদনের বর্তমান অবস্থা দেখুন।<br><span style="color:var(--muted2);">Check your application status using your Application ID.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="fc" id="formArea" style="display:none;">
+  <div style="margin-bottom:16px;"><button onclick="showLanding()" style="font-size:10px;padding:6px 14px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:4px;cursor:pointer;letter-spacing:.06em;">← Back</button></div>
+  <div class="fh"><div class="fb">ভর্তি আবেদনপত্র · Admission Application</div>
+    <div class="ft">শিক্ষার্থী ভর্তি ফর্ম</div>
+    <div class="fs">সকল প্রয়োজনীয় তথ্য পূরণ করুন এবং আবেদন জমা দিন।<br>Fill out all required fields and submit your application.<br>প্রতিষ্ঠান আবেদন পর্যালোচনা করে যোগাযোগ করবে।</div></div>
+
+  <div class="sec"><div class="st">ছবি · Student Photo</div>
+    <div class="pa"><div class="pp" id="pp1" onclick="document.getElementById('pf1').click()"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.4"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+    <div><div style="font-size:10px;color:var(--muted);line-height:1.7">পাসপোর্ট সাইজ ছবি · JPG/PNG · সর্বোচ্চ 2MB</div><button class="bp" type="button" onclick="document.getElementById('pf1').click()">ছবি নির্বাচন · Choose</button><button class="br" id="pr1" type="button" onclick="rmP()">মুছুন</button><input type="file" id="pf1" accept="image/jpeg,image/png" style="display:none" onchange="hdP(this)"></div></div></div>
+
+  <div class="sec"><div class="st">শিক্ষার্থীর পরিচয় · Student Identity</div><div class="fg">
+    <div class="f"><label><span class="bn">শিক্ষার্থীর নাম (বাংলা)</span> <span class="req">*</span></label><input id="af_nameBn" placeholder="বাংলায় নাম লিখুন" oninput="eBn(this)"><div class="fh2">শুধুমাত্র বাংলায় লিখুন · Bengali characters only</div><div class="fm" id="m_nameBn"></div></div>
+    <div class="f"><label><span class="bn">শিক্ষার্থীর নাম (ইংরেজি)</span> <span class="req">*</span></label><input id="af_nameEn" placeholder="Full name in English" oninput="eEn(this)"><div class="fh2">শুধুমাত্র ইংরেজিতে লিখুন · English only</div><div class="fm" id="m_nameEn"></div></div>
+    <div class="f"><label><span class="bn">জন্ম তারিখ</span> Date of Birth <span class="req">*</span></label><input type="date" id="af_dob"><div class="fh2">শিক্ষার্থীর জন্ম তারিখ নির্বাচন করুন</div><div class="fm" id="m_dob"></div></div>
+    <div class="f"><label><span class="bn">যে শ্রেণিতে ভর্তি হতে চায়</span> Desired Class <span class="req">*</span></label><select id="af_admClass"><option value="">— শ্রেণি বেছে নিন / Select Class —</option><option value="00-Kids">শিশু (Kids)</option><option value="Class 1">শ্রেণি ০১ (Class 1)</option><option value="Class 2">শ্রেণি ০২ (Class 2)</option><option value="Class 3">শ্রেণি ০৩ (Class 3)</option><option value="Class 4">শ্রেণি ০৪ (Class 4)</option><option value="Class 5">শ্রেণি ০৫ (Class 5)</option><option value="Class 6">শ্রেণি ০৬ (Class 6)</option><option value="Class 7">শ্রেণি ০৭ (Class 7)</option><option value="Class 8">শ্রেণি ০৮ (Class 8)</option><option value="Class 9">শ্রেণি ০৯ (Class 9)</option></select><div class="fh2">শিক্ষার্থী যে ক্লাসে পড়তে চায় সেটি বেছে নিন</div><div class="fm" id="m_admClass"></div></div>
+    <div class="f"><label><span class="bn">পূর্বে যে শ্রেণিতে পড়েছি</span> Previous Class</label><select id="af_prevClass"><option value="">— প্রযোজ্য নয় / Not Applicable —</option><option value="00-Kids">শিশু (Kids)</option><option value="Class 1">শ্রেণি ০১</option><option value="Class 2">শ্রেণি ০২</option><option value="Class 3">শ্রেণি ০৩</option><option value="Class 4">শ্রেণি ০৪</option><option value="Class 5">শ্রেণি ০৫</option><option value="Class 6">শ্রেণি ০৬</option><option value="Class 7">শ্রেণি ০৭</option><option value="Class 8">শ্রেণি ০৮</option></select><div class="fh2">আগে কোন ক্লাসে পড়েছে সেটি বেছে নিন (না থাকলে খালি রাখুন)</div></div>
+  </div></div>
+
+  <div class="sec"><div class="st">পিতার তথ্য · Father's Information</div><div class="fg">
+    <div class="f"><label><span class="bn">পিতার নাম (বাংলা)</span> <span class="req">*</span></label><input id="af_fatherBn" placeholder="বাংলায় নাম" oninput="eBn(this)"><div class="fh2">শুধুমাত্র বাংলায় লিখুন</div><div class="fm" id="m_fatherBn"></div></div>
+    <div class="f"><label><span class="bn">পিতার নাম (ইংরেজি)</span> <span class="req">*</span></label><input id="af_fatherEn" placeholder="English name" oninput="eEn(this)"><div class="fh2">শুধুমাত্র ইংরেজিতে লিখুন</div><div class="fm" id="m_fatherEn"></div></div>
+    <div class="f"><label><span class="bn">পিতার ফোন নম্বর</span> Phone</label><input id="af_fatherPhone" placeholder="+880 01XXXXXXXXX" type="tel" oninput="vPhone(this)"><div class="phi" id="af_fatherPhoneHint"></div><div class="fh2">দেশের কোড দিয়ে শুরু করুন, যেমন: +880</div></div>
+  </div></div>
+
+  <div class="sec"><div class="st">মাতার তথ্য · Mother's Information</div><div class="fg">
+    <div class="f"><label><span class="bn">মাতার নাম (বাংলা)</span> <span class="req">*</span></label><input id="af_motherBn" placeholder="বাংলায় নাম" oninput="eBn(this)"><div class="fh2">শুধুমাত্র বাংলায় লিখুন</div><div class="fm" id="m_motherBn"></div></div>
+    <div class="f"><label><span class="bn">মাতার নাম (ইংরেজি)</span> <span class="req">*</span></label><input id="af_motherEn" placeholder="English name" oninput="eEn(this)"><div class="fh2">শুধুমাত্র ইংরেজিতে লিখুন</div><div class="fm" id="m_motherEn"></div></div>
+    <div class="f"><label><span class="bn">মাতার ফোন নম্বর</span> Phone</label><input id="af_motherPhone" placeholder="+880 01XXXXXXXXX" type="tel" oninput="vPhone(this)"><div class="phi" id="af_motherPhoneHint"></div><div class="fh2">দেশের কোড দিয়ে শুরু করুন, যেমন: +880</div></div>
+  </div></div>
+
+  <div class="sec"><div class="st">অভিভাবকের তথ্য · Guardian Information</div><div class="fg">
+    <div class="f"><label><span class="bn">অভিভাবকের পেশা</span> Occupation <span class="req">*</span></label><input id="af_occupation" placeholder="যেমন: ব্যবসায়ী, কৃষক, চাকরিজীবী"><div class="fh2">অভিভাবক কী কাজ করেন তা লিখুন</div><div class="fm" id="m_occupation"></div></div>
+    <div class="f"><label><span class="bn">মাসিক আয় (টাকা)</span> Monthly Income</label><input id="af_income" placeholder="15000" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')"><div class="fh2">শুধুমাত্র সংখ্যা লিখুন · Numbers only (BDT)</div></div>
+  </div></div>
+
+  <div class="sec"><div class="st">বিকল্প অভিভাবক · Alternative Guardian</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.7;font-family:sans-serif">পিতা-মাতা উপস্থিত না থাকলে বিকল্প অভিভাবকের তথ্য দিন · Fill if parents are unavailable</div>
+    <div class="fg">
+    <div class="f"><label><span class="bn">নাম</span> Name</label><input id="af_altName" placeholder="বিকল্প অভিভাবকের নাম"><div class="fh2">পিতা/মাতা না থাকলে অন্য অভিভাবকের নাম</div></div>
+    <div class="f"><label><span class="bn">ফোন নম্বর</span> Phone</label><input id="af_altPhone" placeholder="+880 01XXXXXXXXX" type="tel" oninput="vPhone(this)"><div class="phi" id="af_altPhoneHint"></div></div>
+    <div class="f"><label><span class="bn">শিক্ষার্থীর সাথে সম্পর্ক</span> Relation</label><input id="af_altRelation" placeholder="যেমন: চাচা, ফুফু, দাদা"><div class="fh2">শিক্ষার্থীর সাথে কী সম্পর্ক তা লিখুন</div></div>
+  </div></div>
+
+  <div class="sec"><div class="st">ঠিকানা · Address</div><div class="fg">
+    <div class="f"><label><span class="bn">বর্তমান ঠিকানা</span> Present Address <span class="req">*</span></label><textarea id="af_presentAddr" placeholder="বর্তমান ঠিকানা লিখুন"></textarea><div class="fh2">যেখানে এখন বসবাস করছেন</div><div class="fm" id="m_presentAddr"></div></div>
+    <div class="f"><label><span class="bn">স্থায়ী ঠিকানা</span> Permanent Address <span class="req">*</span></label><textarea id="af_permAddr" placeholder="স্থায়ী ঠিকানা লিখুন"></textarea><div class="fh2">মূল/স্থায়ী বাড়ির ঠিকানা</div><div class="fm" id="m_permAddr"></div></div>
+  </div></div>
+
+  <div class="sec"><div class="st">শিক্ষাগত তথ্য · Academic</div><div class="fg">
+    <div class="f"><label><span class="bn">ছাড়পত্র নম্বর</span> TC No.</label><input id="af_tc" placeholder="TC number (optional)"><div class="fh2">পূর্ববর্তী প্রতিষ্ঠানের ছাড়পত্র নম্বর (থাকলে)</div></div>
+    <div class="f"><label><span class="bn">ছাড়পত্রের ছবি</span> TC Photo</label>
+      <div class="pa"><div class="pp" id="pp2" onclick="document.getElementById('pf2').click()" style="width:70px;height:70px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div><div style="font-size:10px;color:var(--muted)">JPG/PNG সর্বোচ্চ 3MB</div><button class="bp" type="button" onclick="document.getElementById('pf2').click()">নির্বাচন</button><button class="br" id="pr2" type="button" onclick="rmT()">মুছুন</button><input type="file" id="pf2" accept="image/jpeg,image/png" style="display:none" onchange="hdT(this)"></div></div></div>
+  </div></div>
+
+  <div class="fa"><button class="bclr" type="button" onclick="clr()">মুছে ফেলুন · Clear</button><button class="bsub" type="button" onclick="sub()">আবেদন জমা দিন · Submit →</button></div>
+</div>
+
+<div class="ss" id="ss">
+  <div class="si"><svg fill="none" stroke="#5cf8a0" stroke-width="1.8" viewBox="0 0 22 22" width="30" height="30"><path d="M4 11l5 5 9-9"/></svg></div>
+  <div style="font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--green);margin-bottom:8px">আবেদন জমা হয়েছে!</div>
+  <div class="fs">আপনার ভর্তি আবেদন সফলভাবে গৃহীত হয়েছে।<br><br>
+    <span style="font-size:12px;color:var(--text);line-height:1.8;">অনুগ্রহ করে আপনার আবেদন পর্যালোচনার জন্য <strong style="color:var(--amber);">কমপক্ষে ৫ কার্যদিবস</strong> অপেক্ষা করুন। নীচের আবেদন আইডি সংরক্ষণ করুন — এটি দিয়ে আপনি যেকোনো সময় আবেদনের অবস্থা যাচাই করতে পারবেন।</span>
+    <br><br>
+    <span style="font-size:10px;color:var(--muted2);">Please allow at least <strong style="color:var(--amber);">5 business days</strong> for your application to be reviewed. Save the Application ID below — you can use it anytime to check your application status.</span>
+    <br><br>
+    <div style="background:var(--surface2);border:1px solid var(--accent);border-radius:8px;padding:14px;display:inline-block;margin:8px 0;">
+      <div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">আবেদন আইডি · Application ID</div>
+      <div id="sId" style="font-size:18px;font-weight:500;color:var(--accent);letter-spacing:.12em;margin-top:4px;">—</div>
+    </div>
+    <br>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
+      <button onclick="showStatusCheck();document.getElementById('statusAppId').value=document.getElementById('sId').textContent;" style="font-size:11px;padding:10px 20px;background:rgba(248,192,92,.1);border:1px solid rgba(248,192,92,.25);color:var(--amber);border-radius:6px;cursor:pointer;letter-spacing:.06em;">📋 Check Status</button>
+      <button onclick="showLanding()" style="font-size:11px;padding:10px 20px;background:rgba(92,110,248,.08);border:1px solid rgba(92,110,248,.2);color:var(--accent);border-radius:6px;cursor:pointer;letter-spacing:.06em;">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APPLICATION STATUS CHECKER ══ -->
+<div id="statusChecker" style="max-width:520px;margin:40px auto;padding:0 16px;display:none;">
+  <div style="margin-bottom:16px;"><button onclick="showLanding()" style="font-size:10px;padding:6px 14px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:4px;cursor:pointer;letter-spacing:.06em;">← Back</button></div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;">
+    <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">📋 আবেদনের অবস্থা যাচাই · Check Application Status</div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:14px;">আপনার আবেদন আইডি লিখুন · Enter your Application ID to check status</div>
+    <div style="display:flex;gap:8px;">
+      <input id="statusAppId" placeholder="e.g. APP-MN8ABS3K" style="flex:1;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;letter-spacing:.06em;outline:none;" type="text" onkeydown="if(event.key==='Enter')checkAppStatus()"/>
+      <button onclick="checkAppStatus()" style="padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:11px;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">যাচাই · Check</button>
+    </div>
+    <div id="statusResult" style="margin-top:14px;"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var FIREBASE_URL='https://sms-admission-4f632-default-rtdb.asia-southeast1.firebasedatabase.app';
+var _p1=null,_p2=null;
+
+function showLanding(){
+  document.getElementById('landingPage').style.display='flex';
+  document.getElementById('formArea').style.display='none';
+  document.getElementById('ss').classList.remove('show');
+  document.getElementById('statusChecker').style.display='none';
+  window.scrollTo(0,0);
+}
+function showApplyForm(){
+  document.getElementById('landingPage').style.display='none';
+  document.getElementById('formArea').style.display='';
+  document.getElementById('statusChecker').style.display='none';
+  window.scrollTo(0,0);
+}
+function showStatusCheck(){
+  document.getElementById('landingPage').style.display='none';
+  document.getElementById('formArea').style.display='none';
+  document.getElementById('ss').classList.remove('show');
+  document.getElementById('statusChecker').style.display='';
+  document.getElementById('statusResult').innerHTML='';
+  window.scrollTo(0,0);
+}
+function eBn(el){el.value=el.value.replace(/[A-Za-z0-9]/g,'');}
+function eEn(el){el.value=el.value.replace(/[^\x20-\x7E]/g,'');}
+var PDB=[{d:'880',f:'🇧🇩',n:'Bangladesh',mx:13},{d:'91',f:'🇮🇳',n:'India',mx:12},{d:'92',f:'🇵🇰',n:'Pakistan',mx:12},{d:'966',f:'🇸🇦',n:'Saudi Arabia',mx:12},{d:'971',f:'🇦🇪',n:'UAE',mx:12},{d:'974',f:'🇶🇦',n:'Qatar',mx:11},{d:'965',f:'🇰🇼',n:'Kuwait',mx:11},{d:'968',f:'🇴🇲',n:'Oman',mx:11},{d:'973',f:'🇧🇭',n:'Bahrain',mx:11},{d:'60',f:'🇲🇾',n:'Malaysia',mx:11},{d:'65',f:'🇸🇬',n:'Singapore',mx:10},{d:'1',f:'🇺🇸',n:'US/Canada',mx:11},{d:'44',f:'🇬🇧',n:'UK',mx:12},{d:'39',f:'🇮🇹',n:'Italy',mx:12}];
+PDB.sort(function(a,b){return b.d.length-a.d.length;});
+function vPhone(el){var v=el.value.replace(/[^+0-9\s\-]/g,'');if(v.indexOf('+')>0)v='+'+v.replace(/\+/g,'');var hint=document.getElementById(el.id+'Hint');if(!v||v==='+'){el.value=v;if(hint)hint.innerHTML='';return;}var digits=v.replace(/[\s\-]/g,'');if(digits.startsWith('+'))digits=digits.slice(1);var country=null;for(var i=0;i<PDB.length;i++){if(digits.startsWith(PDB[i].d)){country=PDB[i];break;}}if(country){if(digits.length>country.mx){v='+'+digits.slice(0,country.mx);}if(hint)hint.innerHTML='<span style="font-size:16px">'+country.f+'</span> <span style="font-size:10px;color:var(--muted)">'+country.n+' (+'+country.d+')</span>';}else{if(hint)hint.innerHTML='<span style="font-size:10px;color:var(--muted)">দেশের কোড দিন · e.g. +880</span>';}el.value=v;}
+function hdP(i){if(!i.files||!i.files[0])return;var f=i.files[0];if(f.size>5e6){st('ছবি ৫ MB এর বেশি হবে না');return;}var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var MW=360,MH=480,w=img.width,h=img.height;if(w>MW){h=Math.round(h*MW/w);w=MW;}if(h>MH){w=Math.round(w*MH/h);h=MH;}var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);_p1=c.toDataURL('image/jpeg',0.72);var pp=document.getElementById('pp1');if(pp){pp.innerHTML='<img src="'+_p1+'" style="width:100%;height:100%;object-fit:cover;display:block;">';pp.style.border='2px solid #5c6ef8';}document.getElementById('pr1').style.display='inline-block';st('ছবি সফলভাবে নির্বাচিত ও সংকুচিত হয়েছে');};img.src=e.target.result;};r.onerror=function(){st('ছবি পড়তে সমস্যা হয়েছে');};r.readAsDataURL(f);}
+function rmP(){_p1=null;document.getElementById('pp1').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.4"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';document.getElementById('pr1').style.display='none';document.getElementById('pf1').value='';}
+function hdT(i){if(!i.files||!i.files[0])return;var f=i.files[0];if(f.size>3e6){st('ফাইল ৩ MB এর বেশি হবে না');return;}var r=new FileReader();r.onload=function(e){_p2=e.target.result;var pp=document.getElementById('pp2');if(pp){pp.innerHTML='<img src="'+_p2+'" style="width:100%;height:100%;object-fit:cover;display:block;">';pp.style.border='2px solid #5c6ef8';}document.getElementById('pr2').style.display='inline-block';st('ছাড়পত্রের ছবি নির্বাচিত হয়েছে');};r.onerror=function(){st('ফাইল পড়তে সমস্যা হয়েছে');};r.readAsDataURL(f);}
+function rmT(){_p2=null;document.getElementById('pp2').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';document.getElementById('pr2').style.display='none';document.getElementById('pf2').value='';}
+function v(id){var e=document.getElementById(id);return e?e.value:'';}
+function st(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3000);}
+function clr(){['af_nameBn','af_nameEn','af_dob','af_admClass','af_prevClass','af_fatherBn','af_fatherEn','af_fatherPhone','af_motherBn','af_motherEn','af_motherPhone','af_occupation','af_income','af_altName','af_altPhone','af_altRelation','af_presentAddr','af_permAddr','af_tc'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});rmP();rmT();document.querySelectorAll('.fm').forEach(function(e){e.textContent='';});['af_fatherPhoneHint','af_motherPhoneHint','af_altPhoneHint'].forEach(function(id){var e=document.getElementById(id);if(e)e.innerHTML='';});}
+function sub(){
+  document.querySelectorAll('.fm').forEach(function(e){e.textContent='';});var ok=true;
+  function rq(id,mid,lb){var x=v(id).trim();if(!x){document.getElementById(mid).textContent=lb+' আবশ্যক';ok=false;}return x;}
+  var d={nameBn:rq('af_nameBn','m_nameBn','নাম (বাংলা)'),nameEn:rq('af_nameEn','m_nameEn','Name (English)'),dob:rq('af_dob','m_dob','জন্ম তারিখ'),admClass:rq('af_admClass','m_admClass','শ্রেণি'),prevClass:v('af_prevClass'),fatherBn:rq('af_fatherBn','m_fatherBn','পিতার নাম (বাংলা)'),fatherEn:rq('af_fatherEn','m_fatherEn','Father (English)'),fatherPhone:v('af_fatherPhone'),motherBn:rq('af_motherBn','m_motherBn','মাতার নাম (বাংলা)'),motherEn:rq('af_motherEn','m_motherEn','Mother (English)'),motherPhone:v('af_motherPhone'),occupation:rq('af_occupation','m_occupation','পেশা'),income:v('af_income'),altGuardianName:v('af_altName'),altGuardianPhone:v('af_altPhone'),altGuardianRelation:v('af_altRelation'),presentAddr:rq('af_presentAddr','m_presentAddr','বর্তমান ঠিকানা'),permAddr:rq('af_permAddr','m_permAddr','স্থায়ী ঠিকানা'),tc:v('af_tc'),photo:_p1||'',tcPhoto:_p2||'',submittedAt:new Date().toLocaleString(),appId:'APP-'+Date.now().toString(36).toUpperCase(),status:'pending'};
+  if(!ok){st('সকল প্রয়োজনীয় তথ্য পূরণ করুন');return;}
+  var btn=document.querySelector('.bsub');btn.textContent='জমা হচ্ছে...';btn.disabled=true;
+  fetch(FIREBASE_URL+'/admissions.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json();}).then(function(){document.getElementById('formArea').style.display='none';document.getElementById('ss').classList.add('show');document.getElementById('sId').textContent=d.appId;}).catch(function(){try{var a=JSON.parse(localStorage.getItem('sms_admissions')||'[]');a.push(d);localStorage.setItem('sms_admissions',JSON.stringify(a));}catch(e){}document.getElementById('formArea').style.display='none';document.getElementById('ss').classList.add('show');document.getElementById('sId').textContent=d.appId;st('স্থানীয়ভাবে সংরক্ষিত');}).finally(function(){btn.textContent='আবেদন জমা দিন · Submit →';btn.disabled=false;});
+}
+
+function checkAppStatus(){
+  var appId=(document.getElementById('statusAppId').value||'').trim().toUpperCase();
+  var box=document.getElementById('statusResult');
+  if(!appId){box.innerHTML='<div style="color:var(--red);font-size:11px;">অনুগ্রহ করে আবেদন আইডি লিখুন · Please enter an Application ID</div>';return;}
+  box.innerHTML='<div style="color:var(--muted);font-size:11px;">অনুসন্ধান হচ্ছে... · Searching...</div>';
+  fetch(FIREBASE_URL+'/admissions.json').then(function(r){return r.json();}).then(function(data){
+    if(!data){box.innerHTML='<div style="color:var(--red);font-size:11px;">কোনো আবেদন পাওয়া যায়নি · No applications found</div>';return;}
+    var found=null;
+    Object.keys(data).forEach(function(key){var app=data[key];if(app&&app.appId&&app.appId.toUpperCase()===appId)found=app;});
+    if(!found){box.innerHTML='<div style="background:rgba(248,92,92,.08);border:1px solid rgba(248,92,92,.2);border-radius:8px;padding:14px;"><div style="font-size:12px;color:var(--red);margin-bottom:4px;">❌ আবেদন খুঁজে পাওয়া যায়নি · Application Not Found</div><div style="font-size:10px;color:var(--muted);">আবেদন আইডি সঠিকভাবে লিখুন · Please verify your Application ID and try again.</div></div>';return;}
+    var s=String(found.status||'').toLowerCase().trim();if(!s){if(found.assignedStudentId||found.approvedAt||found.assignedFormNo)s='approved';else if(found.declinedAt||found.declineReason)s='declined';else if(found.waitlistedAt)s='waitlisted';else s='pending';}
+    if(s==='approved'){
+      box.innerHTML='<div style="background:rgba(92,248,160,.08);border:1px solid rgba(92,248,160,.2);border-radius:8px;padding:16px;"><div style="font-size:14px;color:var(--green);margin-bottom:8px;">✅ আবেদন অনুমোদিত হয়েছে! · Application Approved!</div><div style="font-size:11px;color:var(--text);line-height:1.8;">অভিনন্দন! আপনার ভর্তি আবেদন অনুমোদিত হয়েছে।<br>Congratulations! Your admission has been approved.</div>'+(found.assignedStudentId?'<div style="margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px;"><div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Student Details</div><div style="font-size:12px;color:var(--accent);">Student ID: <strong>'+found.assignedStudentId+'</strong></div>'+(found.assignedFormNo?'<div style="font-size:11px;color:var(--muted);margin-top:2px;">Form #'+found.assignedFormNo+(found.assignedRoll?' · Roll '+found.assignedRoll:'')+'</div>':'')+'</div>':'')+(found.approvedAt?'<div style="font-size:9px;color:var(--muted2);margin-top:8px;">Approved: '+found.approvedAt+'</div>':'')+'</div>';
+    } else if(s==='declined'){
+      box.innerHTML='<div style="background:rgba(248,92,92,.08);border:1px solid rgba(248,92,92,.2);border-radius:8px;padding:16px;"><div style="font-size:14px;color:var(--red);margin-bottom:8px;">❌ আবেদন প্রত্যাখ্যান হয়েছে · Application Declined</div><div style="font-size:11px;color:var(--text);line-height:1.8;">দুঃখিত, আপনার আবেদন প্রত্যাখ্যান করা হয়েছে।<br>We regret to inform you that your application has been declined.</div>'+(found.declineReason?'<div style="margin-top:10px;background:var(--surface2);border:1px solid rgba(248,92,92,.15);border-radius:6px;padding:10px;"><div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:4px;">প্রত্যাখ্যানের কারণ · Reason</div><div style="font-size:11px;color:var(--text);">'+found.declineReason+'</div></div>':'')+(found.declinedAt?'<div style="font-size:9px;color:var(--muted2);margin-top:8px;">Declined: '+found.declinedAt+'</div>':'')+'</div>';
+    } else if(s==='waitlisted'){
+      box.innerHTML='<div style="background:rgba(248,192,92,.08);border:1px solid rgba(248,192,92,.2);border-radius:8px;padding:16px;"><div style="font-size:14px;color:var(--amber);margin-bottom:8px;">⏳ অপেক্ষমান তালিকায় · Waitlisted</div><div style="font-size:11px;color:var(--text);line-height:1.8;">আপনার আবেদন অপেক্ষমান তালিকায় রয়েছে। শীঘ্রই আপনাকে জানানো হবে।<br>Your application is on the waitlist. You will be notified soon.</div></div>';
+    } else {
+      // Pending — check if viewed
+      var viewedMsg='';
+      if(found.viewedAt){
+        viewedMsg='<div style="margin-top:10px;background:rgba(92,110,248,.08);border:1px solid rgba(92,110,248,.2);border-radius:6px;padding:10px;"><div style="font-size:11px;color:var(--accent);line-height:1.7;">👀 একজন প্রশাসক আপনার আবেদন দেখেছেন! আপনি শীঘ্রই ফলাফল পেতে পারেন। পরবর্তী সময়ে আবার যাচাই করুন। শুভকামনা!<br><span style="font-size:10px;color:var(--muted);">An admin has reviewed your application! You may have the result very soon. Check again next time. Good luck!</span></div></div>';
+      }
+      box.innerHTML='<div style="background:rgba(248,192,92,.06);border:1px solid rgba(248,192,92,.15);border-radius:8px;padding:16px;"><div style="font-size:14px;color:var(--amber);margin-bottom:8px;">⏳ পর্যালোচনাধীন · Under Review</div><div style="font-size:11px;color:var(--text);line-height:1.8;">আপনার আবেদন বর্তমানে পর্যালোচনাধীন। অনুগ্রহ করে কমপক্ষে <strong style="color:var(--amber);">৫ কার্যদিবস</strong> অপেক্ষা করুন।<br>Your application is currently under review. Please allow at least <strong style="color:var(--amber);">5 business days</strong> for processing.</div>'+viewedMsg+'</div>';
+    }
+  }).catch(function(){box.innerHTML='<div style="color:var(--red);font-size:11px;">সার্ভারে সংযোগ করা যায়নি · Could not connect to server. Please try again later.</div>';});
+}
+</script>
+</body>
+</html>
