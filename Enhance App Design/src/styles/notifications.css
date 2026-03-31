@@ -1,0 +1,216 @@
+/* =========================================================
+   Notification System — MissingFieldsPopup & Sonner Toasts
+   ========================================================= */
+
+/* ── Entrance animation ─────────────────────────────────── */
+@keyframes missingPopupSlideIn {
+  from { opacity: 0; transform: translateY(-16px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);    }
+}
+
+/* ── Field item entrance (staggered) ────────────────────── */
+@keyframes mfpFieldIn {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+/* ── Field completion fade-out with green flash ─────────── */
+@keyframes fieldFadeOut {
+  0%   { opacity: 1; transform: translateX(0);    max-height: 60px; background: transparent; }
+  20%  { background: rgba(0, 224, 199, 0.14); }
+  60%  { opacity: 0; transform: translateX(28px); max-height: 60px; }
+  100% { opacity: 0; transform: translateX(28px); max-height: 0;    padding-top: 0; padding-bottom: 0; margin: 0; }
+}
+
+/* ── Animated gradient border ───────────────────────────── */
+@keyframes mfpGradientBorder {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+/* ── Progress bar shimmer ───────────────────────────────── */
+@keyframes mfpProgressShimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+/* ── Floating / bobbing idle ────────────────────────────── */
+@keyframes mfpFloat {
+  0%, 100% { transform: translateY(0px);  }
+  50%       { transform: translateY(-5px); }
+}
+
+/* ── Pulsing glow for many-missing state ────────────────── */
+@keyframes mfpPulseGlow {
+  0%, 100% { box-shadow: 0 0 0  0px rgba(248, 92,  92, 0.0),  0 24px 64px rgba(0, 0, 0, 0.65); }
+  50%       { box-shadow: 0 0 0 10px rgba(248, 92,  92, 0.15), 0 24px 64px rgba(0, 0, 0, 0.65); }
+}
+
+/* ── Shake on re-trigger ────────────────────────────────── */
+@keyframes mfpShake {
+  0%, 100% { transform: translateX(0);   }
+  15%       { transform: translateX(-6px); }
+  30%       { transform: translateX( 6px); }
+  45%       { transform: translateX(-4px); }
+  60%       { transform: translateX( 4px); }
+  75%       { transform: translateX(-2px); }
+  90%       { transform: translateX( 2px); }
+}
+
+/* ── All-done celebration entrance ─────────────────────── */
+@keyframes mfpAllDone {
+  0%   { opacity: 0; transform: scale(0.7);  }
+  60%  { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1);    }
+}
+
+/* ── Sonner toast slide-in from top-right ───────────────── */
+@keyframes sonnerSlideIn {
+  from { opacity: 0; transform: translateX(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0)    scale(1);    }
+}
+
+/* =========================================================
+   Panel outer border — gradient border animation
+   ========================================================= */
+.mfp-outer {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.55) 0%,
+    rgba(0, 224, 199, 0.45)  35%,
+    rgba(251, 191, 36, 0.3)  65%,
+    rgba(99, 102, 241, 0.55) 100%
+  );
+  background-size: 300% 300%;
+  animation: mfpGradientBorder 5s ease-in-out infinite;
+}
+
+.mfp-outer.mfp-float-anim {
+  animation: mfpGradientBorder 5s ease-in-out infinite,
+             mfpFloat 3.4s ease-in-out infinite;
+}
+
+.mfp-outer.mfp-pulse-glow {
+  animation: mfpGradientBorder 5s ease-in-out infinite,
+             mfpPulseGlow 2.2s ease-in-out infinite;
+}
+
+.mfp-outer.mfp-pulse-glow.mfp-float-anim {
+  animation: mfpGradientBorder 5s ease-in-out infinite,
+             mfpPulseGlow 2.2s ease-in-out infinite,
+             mfpFloat 3.4s ease-in-out infinite;
+}
+
+.mfp-outer.mfp-shake {
+  animation: mfpShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
+}
+
+/* =========================================================
+   Field items
+   ========================================================= */
+.mfp-item {
+  transition: background 0.12s;
+}
+
+.mfp-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.mfp-item-done {
+  animation: fieldFadeOut 0.58s ease forwards;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Progress bar shimmer
+   ========================================================= */
+.mfp-progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--mfp-bar-color, #6366f1) 0%,
+    rgba(255, 255, 255, 0.3)     50%,
+    var(--mfp-bar-color, #6366f1) 100%
+  );
+  background-size: 200% auto;
+  animation: mfpProgressShimmer 2.2s linear infinite;
+  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================================
+   Scrollbar
+   ========================================================= */
+.mfp-scroll::-webkit-scrollbar        { width: 3px; }
+.mfp-scroll::-webkit-scrollbar-track  { background: transparent; }
+.mfp-scroll::-webkit-scrollbar-thumb  { background: rgba(42, 42, 74, 0.8); border-radius: 2px; }
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+.mfp-btn {
+  transition: transform 0.1s, background 0.12s, opacity 0.1s;
+}
+
+.mfp-btn:active {
+  transform: scale(0.84) !important;
+}
+
+/* =========================================================
+   Accordion collapse transition
+   ========================================================= */
+.mfp-accordion {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity    0.25s ease;
+}
+
+.mfp-accordion.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* =========================================================
+   All-done message
+   ========================================================= */
+.mfp-all-done {
+  animation: mfpAllDone 0.5s ease both;
+}
+
+/* =========================================================
+   Sonner Toaster — dark glassmorphic styling
+   ========================================================= */
+[data-sonner-toaster] {
+  font-family: 'DM Mono', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+[data-sonner-toast] {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 14px !important;
+  animation: sonnerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+  font-size: 13px !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  background: rgba(0, 18, 14, 0.88)  !important;
+  border-color: rgba(0, 224, 199, 0.35) !important;
+  color: #00e0c7 !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  background: rgba(20, 5, 5, 0.88)   !important;
+  border-color: rgba(248, 92, 92, 0.35) !important;
+  color: #f85c5c !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  background: rgba(18, 14, 0, 0.88)  !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+  color: #fbbf24 !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  background: rgba(5, 7, 20, 0.88)   !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+  color: #818cf8 !important;
+}
