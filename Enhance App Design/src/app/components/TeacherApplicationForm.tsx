@@ -326,6 +326,31 @@ const FIELD_LABELS: Record<string, string> = {
   signatureCanvas: 'Applicant Signature',
 };
 
+// Step names for the grouping headers in MissingFieldsPopup
+const STEP_NAMES: Record<number, string> = {
+  1:  'Basic Identity',
+  2:  'Contact & Job',
+  3:  'Academics',
+  4:  'Professional',
+  5:  'Teaching Experience',
+  6:  'Skills',
+  7:  'Personal Background',
+  8:  'Documents',
+  9:  'References',
+  10: 'Declaration',
+};
+
+// Fields that are considered critical (shown with a red CRITICAL badge)
+const CRITICAL_FIELDS = new Set([
+  'fullNameEnglish',
+  'nationalId',
+  'dateOfBirth',
+  'gender',
+  'mobileNumber',
+  'email',
+  'signatureCanvas',
+]);
+
 // Enhanced portal-based draggable notification panel for missing fields
 function MissingFieldsPopup({ 
   allFields, 
@@ -344,18 +369,42 @@ function MissingFieldsPopup({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [justCompleted, setJustCompleted] = useState<string[]>([]);
+  const [collapsedSteps, setCollapsedSteps] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
+  const [confettiFired, setConfettiFired] = useState(false);
   const prevMissingRef = useRef<string[]>([]);
+  const prevVisibleRef = useRef(false);
 
   // Drag state
-  const [pos, setPos] = useState({ x: window.innerWidth - 340, y: 88 });
+  const [pos, setPos] = useState(() => ({
+    x: typeof window !== 'undefined' ? window.innerWidth - 340 : 0,
+    y: 88,
+  }));
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const isDragging = useRef(false);
+  const isDraggingRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const missingFields = allFields.filter(({ field }) => {
     const value = formData[field];
     return !value || (typeof value === 'string' && (value.trim() === '' || value === '-- Select --'));
   });
+
+  const total = missingFields.length;
+  const filledCount = allFields.length - total;
+  const completionPct = (filledCount / allFields.length) * 100;
+
+  // Shake on initial show (visible false → true)
+  useEffect(() => {
+    if (visible && !prevVisibleRef.current && total > 0) {
+      setIsShaking(true);
+      const t = setTimeout(() => setIsShaking(false), 600);
+      prevVisibleRef.current = true;
+      return () => clearTimeout(t);
+    }
+    if (!visible) prevVisibleRef.current = false;
+  }, [visible, total]);
 
   // Track newly completed fields to animate them out
   useEffect(() => {
@@ -366,30 +415,59 @@ function MissingFieldsPopup({
       setJustCompleted(prev => [...prev, ...newlyDone]);
       setTimeout(() => {
         setJustCompleted(prev => prev.filter(f => !newlyDone.includes(f)));
-      }, 600);
+      }, 650);
     }
     prevMissingRef.current = currentMissing;
   }, [formData]);
 
+  // Confetti when all fields complete
+  useEffect(() => {
+    if (visible && total === 0 && !confettiFired) {
+      setConfettiFired(true);
+      import('canvas-confetti').then(({ default: confetti }) => {
+        confetti({
+          particleCount: 90,
+          spread: 65,
+          origin: { y: 0.5 },
+          colors: ['#00e0c7', '#6366f1', '#fbbf24', '#f85c5c'],
+        });
+      });
+    }
+    if (!visible) setConfettiFired(false);
+  }, [total, visible, confettiFired]);
+
   // Auto-close popup when all required fields are filled
   useEffect(() => {
-    if (visible && missingFields.length === 0) {
-      const timer = setTimeout(() => { onClose(); }, 1200);
+    if (visible && total === 0) {
+      const timer = setTimeout(() => onClose(), 2000);
       return () => clearTimeout(timer);
     }
-  }, [missingFields.length, visible]);
+  }, [total, visible, onClose]);
+
+  // Keyboard shortcut: Escape to close
+  useEffect(() => {
+    if (!visible) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [visible, onClose]);
 
   // Drag handlers
   const onMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return;
-    isDragging.current = false;
+    if ((e.target as HTMLElement).closest('button, input')) return;
+    isDraggingRef.current = false;
     dragRef.current = { startX: e.clientX, startY: e.clientY, startPosX: pos.x, startPosY: pos.y };
 
     const onMouseMove = (ev: MouseEvent) => {
       if (!dragRef.current) return;
       const dx = ev.clientX - dragRef.current.startX;
       const dy = ev.clientY - dragRef.current.startY;
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) isDragging.current = true;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      }
       const newX = Math.max(0, Math.min(window.innerWidth - 320, dragRef.current.startPosX + dx));
       const newY = Math.max(0, Math.min(window.innerHeight - 60, dragRef.current.startPosY + dy));
       setPos({ x: newX, y: newY });
@@ -397,6 +475,8 @@ function MissingFieldsPopup({
 
     const onMouseUp = () => {
       dragRef.current = null;
+      isDraggingRef.current = false;
+      setIsDragging(false);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
@@ -407,8 +487,34 @@ function MissingFieldsPopup({
 
   if (!visible) return null;
 
-  const total = missingFields.length;
-  const filledCount = allFields.length - total;
+  // Filter missing fields by search query
+  const filteredMissing = searchQuery.trim()
+    ? missingFields.filter(({ field }) =>
+        (FIELD_LABELS[field] || field).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : missingFields;
+
+  // Group filtered fields by step, preserving global indices for animation delay
+  const groupedByStep: Record<number, Array<{ step: number; field: string; globalIndex: number }>> = {};
+  filteredMissing.forEach((item, i) => {
+    if (!groupedByStep[item.step]) groupedByStep[item.step] = [];
+    groupedByStep[item.step].push({ ...item, globalIndex: i });
+  });
+
+  // Progress bar color: red → amber → green
+  const barColor = completionPct >= 80 ? '#00e0c7' : completionPct >= 50 ? '#fbbf24' : '#f85c5c';
+  const hasManyMissing = total > 10;
+
+  // SVG ring circumference for r=9
+  const circumference = 2 * Math.PI * 9;
+
+  // Outer wrapper CSS classes
+  const outerClasses = [
+    'mfp-outer',
+    isShaking                              ? 'mfp-shake'      : '',
+    hasManyMissing && !isShaking           ? 'mfp-pulse-glow' : '',
+    total > 0 && !isDragging && !isShaking ? 'mfp-float-anim' : '',
+  ].filter(Boolean).join(' ');
 
   const content = (
     <div
@@ -418,171 +524,323 @@ function MissingFieldsPopup({
         left: `${pos.x}px`,
         top: `${pos.y}px`,
         zIndex: 9999,
-        width: '300px',
-        background: '#1a1a2e',
-        border: '1px solid #2a2a4a',
-        borderRadius: '16px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+        width: '310px',
         fontFamily: 'inherit',
-        animation: 'missingPopupSlideIn 0.3s cubic-bezier(0.16,1,0.3,1) both',
-        overflow: 'hidden',
-        userSelect: 'none',
+        animation: 'missingPopupSlideIn 0.32s cubic-bezier(0.16,1,0.3,1) both',
       }}
     >
-      <style>{`
-        @keyframes missingPopupSlideIn {
-          from { opacity: 0; transform: translateY(-12px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes fieldFadeOut {
-          0%   { opacity: 1; transform: translateX(0); max-height: 48px; }
-          60%  { opacity: 0; transform: translateX(20px); max-height: 48px; }
-          100% { opacity: 0; transform: translateX(20px); max-height: 0; padding-top: 0; padding-bottom: 0; margin: 0; }
-        }
-        .mfp-item { transition: background 0.12s; }
-        .mfp-item:hover { background: rgba(255,255,255,0.06) !important; }
-        .mfp-item-done { animation: fieldFadeOut 0.5s ease forwards; pointer-events: none; }
-        .mfp-scroll::-webkit-scrollbar { width: 3px; }
-        .mfp-scroll::-webkit-scrollbar-track { background: transparent; }
-        .mfp-scroll::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
-      `}</style>
-
-      {/* Drag handle header */}
+      {/* Gradient-border wrapper */}
       <div
-        onMouseDown={onMouseDown}
-        style={{
-          padding: '14px 14px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'grab',
-          borderBottom: isCollapsed ? 'none' : '1px solid rgba(255,255,255,0.06)',
-        }}
+        className={outerClasses}
+        style={{ padding: '1px', borderRadius: '18px', boxShadow: '0 24px 64px rgba(0,0,0,0.65)' }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Drag grip dots */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', opacity: 0.3 }}>
-            {[0,1,2].map(i => (
-              <div key={i} style={{ display: 'flex', gap: '3px' }}>
-                <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#8d98ae' }} />
-                <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#8d98ae' }} />
-              </div>
-            ))}
-          </div>
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#e2e4ea', letterSpacing: '-0.01em' }}>
-              {total > 0 ? `${total} field${total !== 1 ? 's' : ''} required` : 'All fields complete!'}
-            </div>
-            <div style={{ fontSize: '10px', color: '#4a5272', marginTop: '2px' }}>
-              {filledCount}/{allFields.length} completed
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }} onMouseDown={e => e.stopPropagation()}>
-          <button
-            onClick={() => setIsCollapsed(c => !c)}
-            style={{
-              width: '26px', height: '26px', borderRadius: '8px',
-              border: '1px solid #2a2a4a', background: 'rgba(255,255,255,0.04)',
-              color: '#6a7194', cursor: 'pointer', fontSize: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            {isCollapsed ? '▼' : '▲'}
-          </button>
-          <button
-            onClick={onClose}
-            style={{
-              width: '26px', height: '26px', borderRadius: '8px',
-              border: '1px solid #2a2a4a', background: 'rgba(255,255,255,0.04)',
-              color: '#6a7194', cursor: 'pointer', fontSize: '16px', lineHeight: 1,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            ×
-          </button>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div style={{ height: '2px', background: '#0d0d1a' }}>
-        <div style={{
-          height: '100%',
-          width: `${(filledCount / allFields.length) * 100}%`,
-          background: total === 0 ? '#00e0c7' : '#6366f1',
-          transition: 'width 0.4s ease',
-          borderRadius: '0 2px 2px 0',
-        }} />
-      </div>
-
-      {/* Field List */}
-      {!isCollapsed && (
+        {/* Glassmorphism panel */}
         <div
-          className="mfp-scroll"
-          style={{ maxHeight: '340px', overflowY: 'auto', padding: '6px 0 8px' }}
+          style={{
+            background: 'rgba(8,12,24,0.88)',
+            backdropFilter: 'blur(22px)',
+            WebkitBackdropFilter: 'blur(22px)',
+            borderRadius: '17px',
+            overflow: 'hidden',
+            userSelect: 'none',
+          }}
         >
-          {missingFields.map(({ step, field }, index) => {
-            const isOnCurrentStep = step === currentStep;
-            const isJustDone = justCompleted.includes(field);
-            return (
-              <div
-                key={`${step}-${field}`}
-                className={`mfp-item${isJustDone ? ' mfp-item-done' : ''}`}
-                onClick={() => !isJustDone && onNavigate(step, field)}
+          {/* ── Header / drag handle ─────────────────── */}
+          <div
+            onMouseDown={onMouseDown}
+            style={{
+              padding: '14px 14px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'grab',
+              borderBottom: isCollapsed ? 'none' : '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {/* Animated grip lines */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '2px', flexShrink: 0 }}>
+                {[1, 0.65, 0.9].map((opacity, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: '18px',
+                      height: '2px',
+                      borderRadius: '2px',
+                      background: 'linear-gradient(90deg, #6366f1, #00e0c7)',
+                      opacity,
+                    }}
+                  />
+                ))}
+              </div>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#e2e4ea', letterSpacing: '-0.01em' }}>
+                  {total > 0 ? `${total} field${total !== 1 ? 's' : ''} required` : '✓ All fields complete!'}
+                </div>
+                <div style={{ fontSize: '10px', color: '#4a5272', marginTop: '2px' }}>
+                  {filledCount}/{allFields.length} completed · Esc to close
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{ display: 'flex', gap: '6px', alignItems: 'center' }}
+              onMouseDown={e => e.stopPropagation()}
+            >
+              <button
+                className="mfp-btn"
+                onClick={() => setIsCollapsed(c => !c)}
+                title={isCollapsed ? 'Expand panel' : 'Collapse panel'}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '8px 14px',
-                  cursor: 'pointer',
-                  background: isOnCurrentStep ? 'rgba(99,102,241,0.08)' : 'transparent',
+                  width: '26px', height: '26px', borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(255,255,255,0.04)',
+                  color: '#6a7194', cursor: 'pointer', fontSize: '10px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                {/* Numbered circle */}
-                <div style={{
-                  width: '22px', height: '22px', borderRadius: '50%',
-                  border: `1.5px solid ${isOnCurrentStep ? '#6366f1' : '#2a2a4a'}`,
-                  background: isOnCurrentStep ? 'rgba(99,102,241,0.15)' : 'transparent',
+                {isCollapsed ? '▼' : '▲'}
+              </button>
+              <button
+                className="mfp-btn"
+                onClick={onClose}
+                title="Close (Esc)"
+                style={{
+                  width: '26px', height: '26px', borderRadius: '8px',
+                  border: '1px solid rgba(248,92,92,0.28)',
+                  background: 'rgba(248,92,92,0.07)',
+                  color: '#f85c5c', cursor: 'pointer', fontSize: '16px', lineHeight: 1,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '10px', fontWeight: 700,
-                  color: isOnCurrentStep ? '#818cf8' : '#4a5272',
-                  flexShrink: 0,
-                  transition: 'border-color 0.15s, color 0.15s',
-                }}>
-                  {index + 1}
-                </div>
-                <span style={{
-                  flex: 1, fontSize: '13px',
-                  color: isOnCurrentStep ? '#e2e4ea' : '#8d98ae',
-                  lineHeight: 1.3,
-                }}>
-                  {FIELD_LABELS[field] || field}
-                </span>
-                {!isOnCurrentStep && (
-                  <span style={{
-                    fontSize: '9px', padding: '2px 6px', borderRadius: '5px',
-                    background: '#12122a', color: '#4a5272',
-                    fontWeight: 600, letterSpacing: '0.04em', whiteSpace: 'nowrap',
-                  }}>
-                    Step {step}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-
-          {total === 0 && (
-            <div style={{
-              padding: '20px 14px', textAlign: 'center',
-              color: '#00e0c7', fontSize: '13px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            }}>
-              <span style={{ fontSize: '18px' }}>✓</span>
-              All required fields completed!
+                }}
+              >
+                ×
+              </button>
             </div>
-          )}
+          </div>
+
+          {/* ── Shimmer progress bar ─────────────────── */}
+          <div style={{ height: '3px', background: 'rgba(0,0,0,0.4)' }}>
+            <div
+              className="mfp-progress-bar"
+              style={{
+                height: '100%',
+                width: `${completionPct}%`,
+                '--mfp-bar-color': barColor,
+                borderRadius: '0 3px 3px 0',
+              } as React.CSSProperties}
+            />
+          </div>
+
+          {/* ── Accordion body ───────────────────────── */}
+          <div
+            className={`mfp-accordion${isCollapsed ? ' collapsed' : ''}`}
+            style={{ maxHeight: isCollapsed ? '0' : '460px' }}
+          >
+            {/* Search input (shown when > 8 missing fields) */}
+            {total > 8 && (
+              <div style={{ padding: '8px 12px 4px' }} onMouseDown={e => e.stopPropagation()}>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="🔍  Filter fields..."
+                  style={{
+                    width: '100%',
+                    padding: '6px 10px',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '8px',
+                    color: '#e2e4ea',
+                    fontSize: '11px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            )}
+
+            {/* ── Field list, grouped by step ───────── */}
+            <div
+              className="mfp-scroll"
+              style={{ maxHeight: '370px', overflowY: 'auto', padding: '4px 0 8px' }}
+            >
+              {Object.entries(groupedByStep).map(([stepStr, items]) => {
+                const stepNum = parseInt(stepStr, 10);
+                const stepCollapsed = collapsedSteps.has(stepNum);
+                const isStepCurrent = stepNum === currentStep;
+                const stepName = STEP_NAMES[stepNum] || `Step ${stepNum}`;
+
+                return (
+                  <div key={stepStr}>
+                    {/* Step group header */}
+                    <div
+                      onClick={() =>
+                        setCollapsedSteps(prev => {
+                          const next = new Set(prev);
+                          if (next.has(stepNum)) next.delete(stepNum);
+                          else next.add(stepNum);
+                          return next;
+                        })
+                      }
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px 4px',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                      }}
+                    >
+                      <span style={{ fontSize: '11px' }}>⚠️</span>
+                      <span
+                        style={{
+                          flex: 1,
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          color: isStepCurrent ? '#818cf8' : '#4a5272',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.07em',
+                        }}
+                      >
+                        Step {stepNum} — {stepName}
+                        <span style={{ fontWeight: 400, marginLeft: '4px' }}>({items.length})</span>
+                      </span>
+                      <span style={{ fontSize: '9px', color: '#4a5272' }}>
+                        {stepCollapsed ? '▶' : '▼'}
+                      </span>
+                    </div>
+
+                    {/* Step group items */}
+                    {!stepCollapsed &&
+                      items.map(({ step, field, globalIndex }) => {
+                        const isOnCurrentStep = step === currentStep;
+                        const isJustDone = justCompleted.includes(field);
+                        const isCritical = CRITICAL_FIELDS.has(field);
+                        const ringFill = circumference * ((total - globalIndex) / total) * 0.72;
+
+                        return (
+                          <div
+                            key={`${step}-${field}`}
+                            className={`mfp-item${isJustDone ? ' mfp-item-done' : ''}`}
+                            onClick={() => !isJustDone && onNavigate(step, field)}
+                            title={`Step ${stepNum} — ${stepName}${isCritical ? ' · Critical field' : ' · Required field'}`}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              padding: '8px 14px',
+                              cursor: 'pointer',
+                              background: isOnCurrentStep ? 'rgba(99,102,241,0.08)' : 'transparent',
+                              animation: `mfpFieldIn 0.3s ease ${globalIndex * 0.04}s both`,
+                            }}
+                          >
+                            {/* Numbered circle with SVG ring */}
+                            <div style={{ position: 'relative', width: '22px', height: '22px', flexShrink: 0 }}>
+                              <svg width="22" height="22" style={{ position: 'absolute', top: 0, left: 0 }}>
+                                <circle
+                                  cx="11" cy="11" r="9"
+                                  fill="none"
+                                  stroke="rgba(99,102,241,0.12)"
+                                  strokeWidth="1.5"
+                                />
+                                <circle
+                                  cx="11" cy="11" r="9"
+                                  fill="none"
+                                  stroke={isOnCurrentStep ? '#6366f1' : isCritical ? '#f85c5c' : '#2a2a4a'}
+                                  strokeWidth="1.5"
+                                  strokeDasharray={String(circumference)}
+                                  strokeDashoffset={String(circumference - ringFill)}
+                                  strokeLinecap="round"
+                                  transform="rotate(-90 11 11)"
+                                  style={{ transition: 'stroke-dashoffset 0.4s ease, stroke 0.2s ease' }}
+                                />
+                              </svg>
+                              <div
+                                style={{
+                                  position: 'absolute', top: 0, left: 0,
+                                  width: '22px', height: '22px',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  fontSize: '10px', fontWeight: 700,
+                                  color: isOnCurrentStep ? '#818cf8' : isCritical ? '#f87171' : '#4a5272',
+                                }}
+                              >
+                                {globalIndex + 1}
+                              </div>
+                            </div>
+
+                            <span
+                              style={{
+                                flex: 1,
+                                fontSize: '12px',
+                                color: isOnCurrentStep ? '#e2e4ea' : '#8d98ae',
+                                lineHeight: 1.3,
+                              }}
+                            >
+                              {FIELD_LABELS[field] || field}
+                            </span>
+
+                            {/* Priority badges */}
+                            {isCritical && (
+                              <span
+                                style={{
+                                  fontSize: '8px', padding: '2px 5px', borderRadius: '4px',
+                                  background: 'rgba(248,92,92,0.12)',
+                                  color: '#f87171',
+                                  fontWeight: 700, letterSpacing: '0.04em',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                CRITICAL
+                              </span>
+                            )}
+                            {!isOnCurrentStep && !isCritical && (
+                              <span
+                                style={{
+                                  fontSize: '9px', padding: '2px 6px', borderRadius: '5px',
+                                  background: 'rgba(18,18,42,0.8)', color: '#4a5272',
+                                  fontWeight: 600, letterSpacing: '0.04em', whiteSpace: 'nowrap',
+                                }}
+                              >
+                                Step {step}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                );
+              })}
+
+              {/* No search results */}
+              {filteredMissing.length === 0 && total > 0 && (
+                <div
+                  style={{
+                    padding: '16px 14px', textAlign: 'center',
+                    color: '#4a5272', fontSize: '12px',
+                  }}
+                >
+                  No fields match your search.
+                </div>
+              )}
+
+              {/* All done */}
+              {total === 0 && (
+                <div
+                  className="mfp-all-done"
+                  style={{
+                    padding: '22px 14px', textAlign: 'center',
+                    color: '#00e0c7', fontSize: '13px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  }}
+                >
+                  <span style={{ fontSize: '20px' }}>✓</span>
+                  All required fields completed!
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 
