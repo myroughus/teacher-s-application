@@ -20,6 +20,8 @@ interface FormFieldProps {
   className?: string;
   readOnly?: boolean;
   disabled?: boolean;
+  pattern?: string;
+  title?: string;
 }
 
 export function FormField({
@@ -42,6 +44,8 @@ export function FormField({
   className = '',
   readOnly = false,
   disabled = false,
+  pattern,
+  title,
 }: FormFieldProps) {
   const inputId = id || name || `field-${label.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`;
 
@@ -112,6 +116,8 @@ export function FormField({
           min={min}
           max={max}
           readOnly={readOnly}
+          pattern={pattern}
+          title={title}
         />
       )}
     </div>
