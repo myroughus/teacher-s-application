@@ -18,8 +18,11 @@ const STEP_REQUIRED_FIELDS: Record<number, string[]> = {
   3: ['examDegreeName1', 'groupSubject1', 'boardUniversity1', 'institutionName1', 'passingYear1', 'result1', 'outOf1', 'duration1', 'certificate1', 'examDegreeName2', 'groupSubject2', 'boardUniversity2', 'institutionName2', 'passingYear2', 'result2', 'outOf2', 'duration2', 'certificate2'],
   4: ['ntrcaStatus', 'mpoExperience'],
   5: ['whyWorkWithUs'],
+  6: ['englishProficiency', 'spokenEnglishLevel', 'arabicProficiency', 'spokenArabicLevel'],
   7: ['emergencyContactName', 'emergencyContactNumber', 'emergencyContactRelation'],
-  10: ['signatureCanvas']
+  8: ['doc_passportPhoto', 'doc_nationalId', 'doc_birthCertificate', 'doc_signature'],
+  9: ['ref1Name', 'ref1Designation', 'ref1Organization', 'ref1Relationship', 'ref1Phone', 'ref1Email'],
+  10: ['declareAccuracy', 'declareVerification', 'declareFraud', 'signatureCanvas']
 };
 
 // All required fields across all steps
@@ -66,9 +69,26 @@ const ALL_REQUIRED_FIELDS = [
   { step: 4, field: 'ntrcaStatus' },
   { step: 4, field: 'mpoExperience' },
   { step: 5, field: 'whyWorkWithUs' },
+  { step: 6, field: 'englishProficiency' },
+  { step: 6, field: 'spokenEnglishLevel' },
+  { step: 6, field: 'arabicProficiency' },
+  { step: 6, field: 'spokenArabicLevel' },
   { step: 7, field: 'emergencyContactName' },
   { step: 7, field: 'emergencyContactNumber' },
   { step: 7, field: 'emergencyContactRelation' },
+  { step: 8, field: 'doc_passportPhoto' },
+  { step: 8, field: 'doc_nationalId' },
+  { step: 8, field: 'doc_birthCertificate' },
+  { step: 8, field: 'doc_signature' },
+  { step: 9, field: 'ref1Name' },
+  { step: 9, field: 'ref1Designation' },
+  { step: 9, field: 'ref1Organization' },
+  { step: 9, field: 'ref1Relationship' },
+  { step: 9, field: 'ref1Phone' },
+  { step: 9, field: 'ref1Email' },
+  { step: 10, field: 'declareAccuracy' },
+  { step: 10, field: 'declareVerification' },
+  { step: 10, field: 'declareFraud' },
   { step: 10, field: 'signatureCanvas' },
 ];
 
@@ -80,6 +100,8 @@ export function TeacherApplicationForm() {
     alternativeMobile: '+880',
     hasQualifications: 'yes',
     hasTeachingExperience: 'yes',
+    hasReferences: true,
+    showSecondReference: false,
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -90,8 +112,7 @@ export function TeacherApplicationForm() {
 
   const getMissingRequiredFields = () => {
     return ALL_REQUIRED_FIELDS.filter(({ field }) => {
-      // Skip ntrcaStatus and mpoExperience when no professional qualifications
-      if ((field === 'ntrcaStatus' || field === 'mpoExperience') && formData.hasQualifications === 'no') return false;
+      if (shouldSkipField(field, formData)) return false;
       return isRequiredFieldEmpty(field, formData[field]);
     });
   };
@@ -114,9 +135,8 @@ export function TeacherApplicationForm() {
     const emptyFields: string[] = [];
     
     requiredFields.forEach(field => {
-      // Skip ntrcaStatus and mpoExperience when no professional qualifications
-      if ((field === 'ntrcaStatus' || field === 'mpoExperience') && formData.hasQualifications === 'no') return;
-      if (isFieldEmpty(field, formData[field])) {
+      if (shouldSkipField(field, formData)) return;
+      if (isRequiredFieldEmpty(field, formData[field])) {
         emptyFields.push(field);
       }
     });
@@ -292,12 +312,9 @@ export function TeacherApplicationForm() {
           ) : (
             <button
               onClick={handleSubmit}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#00e0c7] text-[#040913] rounded-lg hover:bg-[#00b8ae] transition-all font-medium text-[12px]"
+              className="px-10 py-4 text-[15px] font-bold rounded-xl bg-gradient-to-r from-[#00e0c7] to-[#00c896] text-[#040913] hover:from-[#00c8b2] hover:to-[#00b884] transition-all shadow-lg"
             >
-              Submit Application
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              Submit Application ✓
             </button>
           )}
         </div>
@@ -332,6 +349,14 @@ function isRequiredFieldEmpty(field: string, value: any): boolean {
   if ((field === 'mobileNumber' || field === 'alternativeMobile') && typeof value === 'string') {
     return value.length < 14;
   }
+  return false;
+}
+
+// Skip logic for conditional required fields
+function shouldSkipField(field: string, formData: Record<string, any>): boolean {
+  if ((field === 'ntrcaStatus' || field === 'mpoExperience') && formData.hasQualifications === 'no') return true;
+  if (['englishProficiency', 'spokenEnglishLevel', 'arabicProficiency', 'spokenArabicLevel'].includes(field) && formData.isLanguageProficient !== 'yes') return true;
+  if (['ref1Name', 'ref1Designation', 'ref1Organization', 'ref1Relationship', 'ref1Phone', 'ref1Email'].includes(field) && formData.hasReferences === false) return true;
   return false;
 }
 
@@ -382,6 +407,23 @@ const FIELD_LABELS: Record<string, string> = {
   emergencyContactName: 'Emergency Contact Person',
   emergencyContactNumber: 'Emergency Contact Number',
   emergencyContactRelation: 'Emergency Contact Relation',
+  englishProficiency: 'English Proficiency',
+  spokenEnglishLevel: 'Spoken English Level',
+  arabicProficiency: 'Arabic Proficiency',
+  spokenArabicLevel: 'Spoken Arabic Level',
+  doc_passportPhoto: 'Passport-size Photo (Document)',
+  doc_nationalId: 'National ID Copy',
+  doc_birthCertificate: 'Birth Certificate',
+  doc_signature: 'Signature Upload',
+  ref1Name: 'Reference 1 – Full Name',
+  ref1Designation: 'Reference 1 – Designation',
+  ref1Organization: 'Reference 1 – Organization',
+  ref1Relationship: 'Reference 1 – Relationship',
+  ref1Phone: 'Reference 1 – Phone Number',
+  ref1Email: 'Reference 1 – Email',
+  declareAccuracy: 'Declaration: Accuracy of Information',
+  declareVerification: 'Declaration: Consent to Verification',
+  declareFraud: 'Declaration: No Fraudulent Documents',
   signatureCanvas: 'Applicant Signature',
 };
 
@@ -409,6 +451,9 @@ const CRITICAL_FIELDS = new Set([
   'mobileNumber',
   'email',
   'signatureCanvas',
+  'declareAccuracy',
+  'declareVerification',
+  'declareFraud',
 ]);
 
 // Enhanced portal-based draggable notification panel for missing fields
@@ -447,6 +492,7 @@ function MissingFieldsPopup({
   const [isDragging, setIsDragging] = useState(false);
 
   const missingFields = allFields.filter(({ field }) => {
+    if (shouldSkipField(field, formData)) return false;
     return isRequiredFieldEmpty(field, formData[field]);
   });
 
@@ -1733,6 +1779,10 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
   const [hasLanguageCertificates, setHasLanguageCertificates] = useState(false);
   const [languageCertificates, setLanguageCertificates] = useState([{ id: 1, file: null as File | null }]);
 
+  const isLanguageProficient = formData.isLanguageProficient;
+  const showLanguageDropdowns = isLanguageProficient === 'yes';
+  const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
+
   const addLanguageCertificate = () => {
     const newId = languageCertificates.length > 0 ? Math.max(...languageCertificates.map(c => c.id)) + 1 : 1;
     setLanguageCertificates([...languageCertificates, { id: newId, file: null }]);
@@ -1768,9 +1818,7 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
   };
   
   const toggleClass = (cls: string) => {
-    setClassesHandled(prev => 
-      prev.includes(cls) ? prev.filter(c => c !== cls) : [...prev, cls]
-    );
+    setClassesHandled([cls]);
   };
   
   const isPrimaryClassSelected = classesHandled.includes('Class 0-5');
@@ -1839,7 +1887,6 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
     const merged: typeof primarySubjects0to5 = [];
     const seenValues = new Set<string>();
     
-    // First pass: collect all unique subjects by value
     for (const arr of arrays) {
       for (const subject of arr) {
         if (!seenValues.has(subject.value)) {
@@ -2070,40 +2117,113 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
       </FormSection>
 
       <FormSection title="Language Proficiency" sublabel="ভাষা দক্ষতা" icon="🌐">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            label="English Proficiency"
-            sublabel="ইংরেজি দক্ষতা"
-            type="select"
-            options={['Select', 'Beginner', 'Elementary (A2)', 'Intermediate (B1)', 'Upper Intermediate (B2)', 'Advanced (C1)', 'Fluent (C2)', 'Native']}
-          />
-          <FormField
-            label="Spoken English Level"
-            sublabel="বলিত ইংরেজির স্তর"
-            type="select"
-            options={['Select', 'Beginner', 'Intermediate', 'Fluent', 'Native']}
-          />
-          <FormField
-            label="Arabic Proficiency"
-            sublabel="আরবি দক্ষতা"
-            type="select"
-            options={['Select', 'Beginner', 'Elementary (A2)', 'Intermediate (B1)', 'Upper Intermediate (B2)', 'Advanced (C1)', 'Fluent (C2)', 'Native']}
-          />
+        {/* Language proficiency gate question */}
+        <div className="mb-4">
+          <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-3">
+            Are you proficient in English / Arabic? · আপনি কি ইংরেজি / আরবিতে দক্ষ?
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => updateField('isLanguageProficient', 'yes')}
+              className={`px-4 py-2 rounded text-[12px] transition-all ${
+                isLanguageProficient === 'yes'
+                  ? 'bg-[#00e0c7] text-[#040913] font-medium'
+                  : 'bg-[#0d1220] border border-[#1c2540] text-[#8d98ae] hover:border-[#00e0c7]'
+              }`}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              onClick={() => updateField('isLanguageProficient', 'no')}
+              className={`px-4 py-2 rounded text-[12px] transition-all ${
+                isLanguageProficient === 'no'
+                  ? 'bg-[#f85c5c] text-white font-medium'
+                  : 'bg-[#0d1220] border border-[#1c2540] text-[#8d98ae] hover:border-[#f85c5c]'
+              }`}
+            >
+              No
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            label="Spoken Arabic Level"
-            sublabel="বলিত আরবির স্তর"
-            type="select"
-            options={['Select', 'Beginner', 'Intermediate', 'Fluent', 'Native']}
-          />
-          <FormField
-            label="Additional Languages You Know"
-            sublabel="আপনার জানা অতিরিক্ত ভাষা"
-            placeholder="e.g., Hindi, Urdu, French, etc."
-          />
-        </div>
+        {showLanguageDropdowns && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div id="field-englishProficiency" className={showError('englishProficiency') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+                <FormField
+                  label="English Proficiency"
+                  sublabel="ইংরেজি দক্ষতা"
+                  type="select"
+                  required
+                  options={['', 'Beginner', 'Elementary (A2)', 'Intermediate (B1)', 'Upper Intermediate (B2)', 'Advanced (C1)', 'Fluent (C2)', 'Native']}
+                  value={formData.englishProficiency || ''}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('englishProficiency', e.target.value)}
+                />
+                <FieldError show={showError('englishProficiency')} message="English proficiency is required" />
+              </div>
+              <div id="field-spokenEnglishLevel" className={showError('spokenEnglishLevel') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+                <FormField
+                  label="Spoken English Level"
+                  sublabel="বলিত ইংরেজির স্তর"
+                  type="select"
+                  required
+                  options={['', 'Beginner', 'Intermediate', 'Fluent', 'Native']}
+                  value={formData.spokenEnglishLevel || ''}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('spokenEnglishLevel', e.target.value)}
+                />
+                <FieldError show={showError('spokenEnglishLevel')} message="Spoken English level is required" />
+              </div>
+              <div id="field-arabicProficiency" className={showError('arabicProficiency') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+                <FormField
+                  label="Arabic Proficiency"
+                  sublabel="আরবি দক্ষতা"
+                  type="select"
+                  required
+                  options={['', 'Beginner', 'Elementary (A2)', 'Intermediate (B1)', 'Upper Intermediate (B2)', 'Advanced (C1)', 'Fluent (C2)', 'Native']}
+                  value={formData.arabicProficiency || ''}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('arabicProficiency', e.target.value)}
+                />
+                <FieldError show={showError('arabicProficiency')} message="Arabic proficiency is required" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div id="field-spokenArabicLevel" className={showError('spokenArabicLevel') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+                <FormField
+                  label="Spoken Arabic Level"
+                  sublabel="বলিত আরবির স্তর"
+                  type="select"
+                  required
+                  options={['', 'Beginner', 'Intermediate', 'Fluent', 'Native']}
+                  value={formData.spokenArabicLevel || ''}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('spokenArabicLevel', e.target.value)}
+                />
+                <FieldError show={showError('spokenArabicLevel')} message="Spoken Arabic level is required" />
+              </div>
+              <FormField
+                label="Additional Languages You Know"
+                sublabel="আপনার জানা অতিরিক্ত ভাষা"
+                placeholder="e.g., Hindi, Urdu, French, etc."
+                value={formData.additionalLanguages || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('additionalLanguages', e.target.value)}
+              />
+            </div>
+          </>
+        )}
+
+        {!showLanguageDropdowns && (
+          <div className="mb-2">
+            <FormField
+              label="Additional Languages You Know"
+              sublabel="আপনার জানা অতিরিক্ত ভাষা"
+              placeholder="e.g., Hindi, Urdu, French, etc."
+              value={formData.additionalLanguages || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('additionalLanguages', e.target.value)}
+            />
+          </div>
+        )}
 
         <div className="pt-4">
           <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-3">
@@ -2489,37 +2609,51 @@ function Step7PersonalBackground({ formData, updateField, validationErrors, atte
   );
 }
 
-function Step8Documents({ formData, updateField, validationErrors, attemptedSubmit }: StepProps) {
+function Step8Documents({ formData, updateField, validationErrors, attemptedSubmit, highlightedField }: StepProps) {
+  const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
+  const getFieldWrapperClass = (fieldName: string) => {
+    if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
+    if (showError(fieldName)) return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+    return '';
+  };
+
+  const docs = [
+    { label: 'Passport-size Photo', sublabel: 'পাসপোর্ট সাইজ ছবি', icon: '🖼️', field: 'doc_passportPhoto', accept: 'image/*', required: true },
+    { label: 'National ID Copy', sublabel: 'জাতীয় পরিচয়পত্রের কপি', icon: '📇', field: 'doc_nationalId', accept: '.pdf,image/*', required: true },
+    { label: 'Birth Certificate', sublabel: 'জন্ম সনদ', icon: '📄', field: 'doc_birthCertificate', accept: '.pdf,image/*', required: true },
+    { label: 'Experience Certificates', sublabel: 'অভিজ্ঞতার সনদ (ঐচ্ছিক)', icon: '🏅', field: 'doc_experienceCertificates', accept: '.pdf,image/*', required: false, multiple: true },
+    { label: 'Signature Upload', sublabel: 'স্বাক্ষর আপলোড', icon: '✍️', field: 'doc_signature', accept: 'image/*', required: true },
+  ];
+
   return (
     <FormSection title="Document Upload · নথিপত্র আপলোড" icon="📁">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { name: 'Passport-size Photo', icon: '🖼️', required: true },
-          { name: 'National ID Copy', icon: '📇', required: true },
-          { name: 'Birth Certificate', icon: '📄', required: true },
-          { name: 'Experience Certificates', icon: '🏅', required: false, multiple: true },
-          { name: 'Signature Upload', icon: '✍️', required: true },
-        ].map((doc) => (
-          <div key={doc.name}>
+        {docs.map((doc) => (
+          <div key={doc.field} id={`field-${doc.field}`} className={getFieldWrapperClass(doc.field)}>
             <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-2">
-              {doc.name} {doc.required && <span className="text-[#f85c5c]">*</span>}
+              {doc.label} {doc.required && <span className="text-[#f85c5c]">*</span>}
+              {doc.sublabel && <><br /><span className="normal-case tracking-normal">{doc.sublabel}</span></>}
             </label>
-            <div className="relative border-[1.5px] border-dashed border-[#1c2540] rounded-lg hover:border-[#00e0c7] hover:bg-[#0f1524] transition-all bg-[#0d1220]">
+            <div className={`relative border-[1.5px] border-dashed rounded-lg hover:border-[#00e0c7] hover:bg-[#0f1524] transition-all bg-[#0d1220] ${showError(doc.field) ? 'border-[rgba(248,92,92,0.5)]' : 'border-[#1c2540]'}`}>
               <input
                 type="file"
-                accept={doc.name === 'Signature Upload' || doc.name === 'Passport-size Photo' ? 'image/*' : '.pdf,image/*'}
+                accept={doc.accept}
                 multiple={doc.multiple}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                id={`doc-${doc.name.replace(/\s+/g, '-')}`}
+                id={`doc-${doc.field}`}
+                onChange={(e) => updateField(doc.field, e.target.files?.[0]?.name || '')}
               />
               <div className="flex flex-col items-center justify-center gap-2 px-4 py-6 pointer-events-none">
                 <span className="text-[20px]">{doc.icon}</span>
                 <span className="text-[11px] text-[#6a7194]">
-                  {doc.multiple ? 'Multiple files ' : 'Drop or '}
-                  <strong className="text-[#00e0c7]">{doc.multiple ? 'OK' : 'Browse'}</strong>
+                  {formData[doc.field]
+                    ? <strong className="text-[#00e0c7]">{formData[doc.field]}</strong>
+                    : <>{doc.multiple ? 'Multiple files ' : 'Drop or '}<strong className="text-[#00e0c7]">{doc.multiple ? 'OK' : 'Browse'}</strong></>
+                  }
                 </span>
               </div>
             </div>
+            {doc.required && <FieldError show={showError(doc.field)} message={`${doc.label} is required`} />}
           </div>
         ))}
       </div>
@@ -2527,10 +2661,16 @@ function Step8Documents({ formData, updateField, validationErrors, attemptedSubm
   );
 }
 
-function Step9References({ formData, updateField, validationErrors, attemptedSubmit }: StepProps) {
-  const [hasReferences, setHasReferences] = useState(true);
-  const [showSecondReference, setShowSecondReference] = useState(false);
-  
+function Step9References({ formData, updateField, validationErrors, attemptedSubmit, highlightedField }: StepProps) {
+  const hasReferences = formData.hasReferences !== false;
+  const showSecondReference = formData.showSecondReference === true;
+  const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
+  const getFieldWrapperClass = (fieldName: string) => {
+    if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
+    if (showError(fieldName)) return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+    return '';
+  };
+
   return (
     <FormSection title="Professional References · পেশাদার রেফারেন্স" icon="👥">
       <div className="mb-4">
@@ -2540,7 +2680,7 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => setHasReferences(true)}
+            onClick={() => updateField('hasReferences', true)}
             className={`px-4 py-2 rounded text-[12px] transition-all ${
               hasReferences 
                 ? 'bg-[#00e0c7] text-[#040913] font-medium' 
@@ -2551,7 +2691,7 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
           </button>
           <button
             type="button"
-            onClick={() => setHasReferences(false)}
+            onClick={() => updateField('hasReferences', false)}
             className={`px-4 py-2 rounded text-[12px] transition-all ${
               !hasReferences 
                 ? 'bg-[#f85c5c] text-white font-medium' 
@@ -2570,16 +2710,52 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
             <h3 className="text-[11px] tracking-[0.1em] uppercase text-[#00e0c7] mb-4">Reference 1</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Full Name" sublabel="পূর্ণ নাম" placeholder="Reference person's name" required />
-                <FormField label="Designation" sublabel="পদবি" placeholder="Their position" required />
+                <div id="field-ref1Name" className={getFieldWrapperClass('ref1Name')}>
+                  <FormField label="Full Name" sublabel="পূর্ণ নাম" placeholder="Reference person's name" required
+                    value={formData.ref1Name || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref1Name', e.target.value)}
+                  />
+                  <FieldError show={showError('ref1Name')} message="Reference name is required" />
+                </div>
+                <div id="field-ref1Designation" className={getFieldWrapperClass('ref1Designation')}>
+                  <FormField label="Designation" sublabel="পদবি" placeholder="Their position" required
+                    value={formData.ref1Designation || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref1Designation', e.target.value)}
+                  />
+                  <FieldError show={showError('ref1Designation')} message="Designation is required" />
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Organization" sublabel="প্রতিষ্ঠান" placeholder="Where they work" required />
-                <FormField label="Relationship" sublabel="সম্পর্ক" placeholder="e.g., Former supervisor" required />
+                <div id="field-ref1Organization" className={getFieldWrapperClass('ref1Organization')}>
+                  <FormField label="Organization" sublabel="প্রতিষ্ঠান" placeholder="Where they work" required
+                    value={formData.ref1Organization || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref1Organization', e.target.value)}
+                  />
+                  <FieldError show={showError('ref1Organization')} message="Organization is required" />
+                </div>
+                <div id="field-ref1Relationship" className={getFieldWrapperClass('ref1Relationship')}>
+                  <FormField label="Relationship" sublabel="সম্পর্ক" placeholder="e.g., Former supervisor" required
+                    value={formData.ref1Relationship || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref1Relationship', e.target.value)}
+                  />
+                  <FieldError show={showError('ref1Relationship')} message="Relationship is required" />
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField label="Phone Number" sublabel="ফোন নম্বর" type="tel" placeholder="Contact number" required />
-                <FormField label="Email" sublabel="ইমেইল" type="email" placeholder="Email address" required />
+                <div id="field-ref1Phone" className={getFieldWrapperClass('ref1Phone')}>
+                  <FormField label="Phone Number" sublabel="ফোন নম্বর" type="tel" placeholder="Contact number" required
+                    value={formData.ref1Phone || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref1Phone', e.target.value)}
+                  />
+                  <FieldError show={showError('ref1Phone')} message="Phone number is required" />
+                </div>
+                <div id="field-ref1Email" className={getFieldWrapperClass('ref1Email')}>
+                  <FormField label="Email" sublabel="ইমেইল" type="email" placeholder="Email address" required
+                    value={formData.ref1Email || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref1Email', e.target.value)}
+                  />
+                  <FieldError show={showError('ref1Email')} message="Email is required" />
+                </div>
               </div>
             </div>
           </div>
@@ -2591,7 +2767,7 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
                 <h3 className="text-[11px] tracking-[0.1em] uppercase text-[#00e0c7]">Reference 2</h3>
                 <button 
                   type="button"
-                  onClick={() => setShowSecondReference(false)}
+                  onClick={() => updateField('showSecondReference', false)}
                   className="w-6 h-6 rounded-full border border-[rgba(240,113,113,0.3)] bg-[rgba(240,113,113,0.15)] text-[#f07171] flex items-center justify-center text-[14px] hover:bg-[#f07171] hover:text-white transition-colors"
                   title="Remove Reference 2"
                 >
@@ -2600,16 +2776,34 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
               </div>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField label="Full Name" sublabel="পূর্ণ নাম" placeholder="Reference person's name" required />
-                  <FormField label="Designation" sublabel="পদবি" placeholder="Their position" required />
+                  <FormField label="Full Name" sublabel="পূর্ণ নাম" placeholder="Reference person's name" required
+                    value={formData.ref2Name || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref2Name', e.target.value)}
+                  />
+                  <FormField label="Designation" sublabel="পদবি" placeholder="Their position" required
+                    value={formData.ref2Designation || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref2Designation', e.target.value)}
+                  />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField label="Organization" sublabel="প্রতিষ্ঠান" placeholder="Where they work" required />
-                  <FormField label="Relationship" sublabel="সম্পর্ক" placeholder="e.g., Academic mentor" required />
+                  <FormField label="Organization" sublabel="প্রতিষ্ঠান" placeholder="Where they work" required
+                    value={formData.ref2Organization || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref2Organization', e.target.value)}
+                  />
+                  <FormField label="Relationship" sublabel="সম্পর্ক" placeholder="e.g., Academic mentor" required
+                    value={formData.ref2Relationship || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref2Relationship', e.target.value)}
+                  />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField label="Phone Number" sublabel="ফোন নম্বর" type="tel" placeholder="Contact number" required />
-                  <FormField label="Email" sublabel="ইমেইল" type="email" placeholder="Email address" required />
+                  <FormField label="Phone Number" sublabel="ফোন নম্বর" type="tel" placeholder="Contact number" required
+                    value={formData.ref2Phone || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref2Phone', e.target.value)}
+                  />
+                  <FormField label="Email" sublabel="ইমেইল" type="email" placeholder="Email address" required
+                    value={formData.ref2Email || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('ref2Email', e.target.value)}
+                  />
                 </div>
               </div>
             </div>
@@ -2618,7 +2812,7 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
           {!showSecondReference && (
             <button 
               type="button"
-              onClick={() => setShowSecondReference(true)}
+              onClick={() => updateField('showSecondReference', true)}
               className="text-[11px] px-4 py-2 bg-[rgba(0,224,199,0.08)] border border-[rgba(0,224,199,0.25)] text-[#00e0c7] rounded hover:bg-[rgba(0,224,199,0.12)] transition-colors"
             >
               + Add Second Reference
@@ -2633,7 +2827,20 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
 function Step10Declaration({ formData, updateField, validationErrors, attemptedSubmit, highlightedField }: StepProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [signatureDrawn, setSignatureDrawn] = useState(false);
+  const [signatureDrawn, setSignatureDrawn] = useState(!!formData.signatureCanvas);
+
+  // Restore saved signature drawing on mount
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !formData.signatureDataURL) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = formData.signatureDataURL;
+  }, []);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -2672,6 +2879,8 @@ function Step10Declaration({ formData, updateField, validationErrors, attemptedS
     ctx.stroke();
     setSignatureDrawn(true);
     updateField('signatureCanvas', 'signed');
+    // Save drawing to formData for persistence
+    updateField('signatureDataURL', canvas.toDataURL());
   };
 
   const stopDrawing = () => {
@@ -2686,23 +2895,41 @@ function Step10Declaration({ formData, updateField, validationErrors, attemptedS
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setSignatureDrawn(false);
     updateField('signatureCanvas', '');
+    updateField('signatureDataURL', '');
   };
+
+  const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
 
   return (
     <FormSection title="Declaration & Submission · ঘোষণা ও জমা" icon="✓">
       <div className="space-y-3 mb-6">
-        <Checkbox
-          label="I hereby confirm that all information provided in this application form is true, complete, and accurate to the best of my knowledge. I understand that any false or misleading information may result in immediate disqualification or termination. · আমি এতদ্বারা নিশ্চিত করছি যে এই আবেদনপত্রে প্রদত্ত সমস্ত তথ্য আমার জ্ঞানমতে সত্য, সম্পূর্ণ এবং সঠিক। আমি বুঝি যে কোনো মিথ্যা বা বিভ্রান্তিকর তথ্যের ফলে অবিলম্বে অযোগ্যতা বা চাকরিচ্যুতি হতে পারে।"
-          required
-        />
-        <Checkbox
-          label="I agree that the institution has the right to verify all information provided in this application, including contacting previous employers, educational institutions, and references listed herein. · আমি একমত যে প্রতিষ্ঠানের এই আবেদনে প্রদত্ত সমস্ত তথ্য যাচাই করার অধিকার আছে, যার মধ্যে রয়েছে পূর্ববর্তী নিয়োগকর্তা, শিক্ষা প্রতিষ্ঠান এবং এখানে তালিকাভুক্ত রেফারেন্সের সাথে যোগাযোগ।"
-          required
-        />
-        <Checkbox
-          label="I understand that submission of false information, misrepresentation of qualifications, or fraudulent documents may result in permanent cancellation of my application and possible legal consequences. · মিথ্যা তথ্য জমা দেওয়া, যোগ্যতার ভুল উপস্থাপনা, বা প্রতারণামূলক নথিপত্রের ফলে আমার আবেদনের স্থায়ী বাতিল এবং সম্ভাব্য আইনি পরিণতি হতে পারে তা আমি বুঝি।"
-          required
-        />
+        <div id="field-declareAccuracy">
+          <Checkbox
+            checked={!!formData.declareAccuracy}
+            onChange={(checked) => updateField('declareAccuracy', checked)}
+            label="I hereby confirm that all information provided in this application form is true, complete, and accurate to the best of my knowledge. I understand that any false or misleading information may result in immediate disqualification or termination. · আমি এতদ্বারা নিশ্চিত করছি যে এই আবেদনপত্রে প্রদত্ত সমস্ত তথ্য আমার জ্ঞানমতে সত্য, সম্পূর্ণ এবং সঠিক। আমি বুঝি যে কোনো মিথ্যা বা বিভ্রান্তিকর তথ্যের ফলে অবিলম্বে অযোগ্যতা বা চাকরিচ্যুতি হতে পারে।"
+            required
+          />
+          <FieldError show={showError('declareAccuracy')} message="You must confirm the accuracy of information" />
+        </div>
+        <div id="field-declareVerification">
+          <Checkbox
+            checked={!!formData.declareVerification}
+            onChange={(checked) => updateField('declareVerification', checked)}
+            label="I agree that the institution has the right to verify all information provided in this application, including contacting previous employers, educational institutions, and references listed herein. · আমি একমত যে প্রতিষ্ঠানের এই আবেদনে প্রদত্ত সমস্ত তথ্য যাচাই করার অধিকার আছে, যার মধ্যে রয়েছে পূর্ববর্তী নিয়োগকর্তা, শিক্ষা প্রতিষ্ঠান এবং এখানে তালিকাভুক্ত রেফারেন্সের সাথে যোগাযোগ।"
+            required
+          />
+          <FieldError show={showError('declareVerification')} message="You must consent to verification" />
+        </div>
+        <div id="field-declareFraud">
+          <Checkbox
+            checked={!!formData.declareFraud}
+            onChange={(checked) => updateField('declareFraud', checked)}
+            label="I understand that submission of false information, misrepresentation of qualifications, or fraudulent documents may result in permanent cancellation of my application and possible legal consequences. · মিথ্যা তথ্য জমা দেওয়া, যোগ্যতার ভুল উপস্থাপনা, বা প্রতারণামূলক নথিপত্রের ফলে আমার আবেদনের স্থায়ী বাতিল এবং সম্ভাব্য আইনি পরিণতি হতে পারে তা আমি বুঝি।"
+            required
+          />
+          <FieldError show={showError('declareFraud')} message="You must acknowledge the fraud declaration" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#1c2540]">
