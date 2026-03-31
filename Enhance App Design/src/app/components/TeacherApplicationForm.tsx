@@ -2827,7 +2827,7 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
 function Step10Declaration({ formData, updateField, validationErrors, attemptedSubmit, highlightedField }: StepProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [signatureDrawn, setSignatureDrawn] = useState(!!formData.signatureCanvas);
+  const [signatureDrawn, setSignatureDrawn] = useState(!!(formData.signatureDataURL || formData.signatureCanvas));
 
   // Restore saved signature drawing on mount
   useEffect(() => {
@@ -2840,7 +2840,7 @@ function Step10Declaration({ formData, updateField, validationErrors, attemptedS
       ctx.drawImage(img, 0, 0);
     };
     img.src = formData.signatureDataURL;
-  }, []);
+  }, [formData.signatureDataURL]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
