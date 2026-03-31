@@ -13,16 +13,18 @@ const TOTAL_STEPS = 10;
 
 // Required fields by step for navigation guidance
 const STEP_REQUIRED_FIELDS: Record<number, string[]> = {
-  1: ['fullNameEnglish', 'fullNameBangla', 'fathersName', 'mothersName', 'dateOfBirth', 'gender', 'maritalStatus', 'nationalId'],
-  2: ['mobileNumber', 'email', 'presentAddress', 'permanentAddress', 'district', 'thana', 'applyingForPost', 'subjectDepartment'],
-  3: ['examDegreeName1', 'examDegreeName2'],
+  1: ['photoUploaded', 'fullNameEnglish', 'fullNameBangla', 'fathersName', 'mothersName', 'dateOfBirth', 'gender', 'maritalStatus', 'nationalId'],
+  2: ['mobileNumber', 'alternativeMobile', 'email', 'presentAddress', 'permanentAddress', 'district', 'thana', 'applyingForPost', 'subjectDepartment', 'expectedJoiningDate', 'employmentType'],
+  3: ['examDegreeName1', 'groupSubject1', 'boardUniversity1', 'institutionName1', 'passingYear1', 'result1', 'outOf1', 'duration1', 'certificate1', 'examDegreeName2', 'groupSubject2', 'boardUniversity2', 'institutionName2', 'passingYear2', 'result2', 'outOf2', 'duration2', 'certificate2'],
   4: ['ntrcaStatus', 'mpoExperience'],
+  5: ['whyWorkWithUs'],
   7: ['emergencyContactName', 'emergencyContactNumber', 'emergencyContactRelation'],
   10: ['signatureCanvas']
 };
 
 // All required fields across all steps
 const ALL_REQUIRED_FIELDS = [
+  { step: 1, field: 'photoUploaded' },
   { step: 1, field: 'fullNameEnglish' },
   { step: 1, field: 'fullNameBangla' },
   { step: 1, field: 'fathersName' },
@@ -33,6 +35,7 @@ const ALL_REQUIRED_FIELDS = [
   { step: 1, field: 'nationality' },
   { step: 1, field: 'nationalId' },
   { step: 2, field: 'mobileNumber' },
+  { step: 2, field: 'alternativeMobile' },
   { step: 2, field: 'email' },
   { step: 2, field: 'presentAddress' },
   { step: 2, field: 'permanentAddress' },
@@ -40,10 +43,29 @@ const ALL_REQUIRED_FIELDS = [
   { step: 2, field: 'thana' },
   { step: 2, field: 'applyingForPost' },
   { step: 2, field: 'subjectDepartment' },
+  { step: 2, field: 'expectedJoiningDate' },
+  { step: 2, field: 'employmentType' },
   { step: 3, field: 'examDegreeName1' },
+  { step: 3, field: 'groupSubject1' },
+  { step: 3, field: 'boardUniversity1' },
+  { step: 3, field: 'institutionName1' },
+  { step: 3, field: 'passingYear1' },
+  { step: 3, field: 'result1' },
+  { step: 3, field: 'outOf1' },
+  { step: 3, field: 'duration1' },
+  { step: 3, field: 'certificate1' },
   { step: 3, field: 'examDegreeName2' },
+  { step: 3, field: 'groupSubject2' },
+  { step: 3, field: 'boardUniversity2' },
+  { step: 3, field: 'institutionName2' },
+  { step: 3, field: 'passingYear2' },
+  { step: 3, field: 'result2' },
+  { step: 3, field: 'outOf2' },
+  { step: 3, field: 'duration2' },
+  { step: 3, field: 'certificate2' },
   { step: 4, field: 'ntrcaStatus' },
   { step: 4, field: 'mpoExperience' },
+  { step: 5, field: 'whyWorkWithUs' },
   { step: 7, field: 'emergencyContactName' },
   { step: 7, field: 'emergencyContactNumber' },
   { step: 7, field: 'emergencyContactRelation' },
@@ -54,6 +76,10 @@ export function TeacherApplicationForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, any>>({
     nationality: 'Bangladeshi',
+    mobileNumber: '+880',
+    alternativeMobile: '+880',
+    hasQualifications: 'yes',
+    hasTeachingExperience: 'yes',
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -64,21 +90,22 @@ export function TeacherApplicationForm() {
 
   const getMissingRequiredFields = () => {
     return ALL_REQUIRED_FIELDS.filter(({ field }) => {
-      const value = formData[field];
-      return !value || (typeof value === 'string' && (value.trim() === '' || value === '-- Select --'));
+      // Skip ntrcaStatus and mpoExperience when no professional qualifications
+      if ((field === 'ntrcaStatus' || field === 'mpoExperience') && formData.hasQualifications === 'no') return false;
+      return isRequiredFieldEmpty(field, formData[field]);
     });
   };
 
   const updateField = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
 
-    const hasValue = Array.isArray(value)
-      ? value.length > 0
-      : value !== undefined && value !== null && String(value).trim() !== '' && String(value) !== '-- Select --';
+    const isEmpty = Array.isArray(value)
+      ? value.length === 0
+      : isRequiredFieldEmpty(field, value);
 
     setValidationErrors(prev => ({
       ...prev,
-      fields: { ...prev.fields, [field]: !hasValue }
+      fields: { ...prev.fields, [field]: isEmpty }
     }));
   };
 
@@ -87,8 +114,9 @@ export function TeacherApplicationForm() {
     const emptyFields: string[] = [];
     
     requiredFields.forEach(field => {
-      const value = formData[field];
-      if (!value || (typeof value === 'string' && (value.trim() === '' || value === '-- Select --'))) {
+      // Skip ntrcaStatus and mpoExperience when no professional qualifications
+      if ((field === 'ntrcaStatus' || field === 'mpoExperience') && formData.hasQualifications === 'no') return;
+      if (isFieldEmpty(field, formData[field])) {
         emptyFields.push(field);
       }
     });
@@ -297,8 +325,19 @@ function FieldError({ show, message }: { show: boolean; message: string }) {
   );
 }
 
+// Helper: check if a required field value is considered empty/invalid
+function isRequiredFieldEmpty(field: string, value: any): boolean {
+  if (!value || (typeof value === 'string' && (value.trim() === '' || value === '-- Select --'))) return true;
+  // Mobile fields need exactly 14 chars ('+880' prefix + 10 digits)
+  if ((field === 'mobileNumber' || field === 'alternativeMobile') && typeof value === 'string') {
+    return value.length < 14;
+  }
+  return false;
+}
+
 // Field label registry
 const FIELD_LABELS: Record<string, string> = {
+  photoUploaded: 'Passport-size Photo',
   fullNameEnglish: 'Full Name (English)',
   fullNameBangla: 'Full Name (Bangla)',
   fathersName: "Father's Name",
@@ -309,6 +348,7 @@ const FIELD_LABELS: Record<string, string> = {
   nationality: 'Nationality',
   nationalId: 'National ID Number',
   mobileNumber: 'Mobile Number',
+  alternativeMobile: 'Alternative Mobile Number',
   email: 'Email Address',
   presentAddress: 'Present Address',
   permanentAddress: 'Permanent Address',
@@ -316,10 +356,29 @@ const FIELD_LABELS: Record<string, string> = {
   thana: 'Thana / Upazila',
   applyingForPost: 'Applying For Post',
   subjectDepartment: 'Subject / Department',
+  expectedJoiningDate: 'Expected Joining Date',
+  employmentType: 'Employment Type',
   examDegreeName1: 'Exam / Degree (1st Qualification)',
+  groupSubject1: 'Group / Subject (1st Qualification)',
+  boardUniversity1: 'Board / University (1st Qualification)',
+  institutionName1: 'Institution Name (1st Qualification)',
+  passingYear1: 'Passing Year (1st Qualification)',
+  result1: 'Result / GPA (1st Qualification)',
+  outOf1: 'Out Of (1st Qualification)',
+  duration1: 'Duration (1st Qualification)',
+  certificate1: 'Certificate Upload (1st Qualification)',
   examDegreeName2: 'Exam / Degree (2nd Qualification)',
+  groupSubject2: 'Group / Subject (2nd Qualification)',
+  boardUniversity2: 'Board / University (2nd Qualification)',
+  institutionName2: 'Institution Name (2nd Qualification)',
+  passingYear2: 'Passing Year (2nd Qualification)',
+  result2: 'Result / GPA (2nd Qualification)',
+  outOf2: 'Out Of (2nd Qualification)',
+  duration2: 'Duration (2nd Qualification)',
+  certificate2: 'Certificate Upload (2nd Qualification)',
   ntrcaStatus: 'NTRCA Registration Status',
   mpoExperience: 'MPO Experience',
+  whyWorkWithUs: 'Why do you want to work with us?',
   emergencyContactName: 'Emergency Contact Person',
   emergencyContactNumber: 'Emergency Contact Number',
   emergencyContactRelation: 'Emergency Contact Relation',
@@ -342,6 +401,7 @@ const STEP_NAMES: Record<number, string> = {
 
 // Fields that are considered critical (shown with a red CRITICAL badge)
 const CRITICAL_FIELDS = new Set([
+  'photoUploaded',
   'fullNameEnglish',
   'nationalId',
   'dateOfBirth',
@@ -387,8 +447,7 @@ function MissingFieldsPopup({
   const [isDragging, setIsDragging] = useState(false);
 
   const missingFields = allFields.filter(({ field }) => {
-    const value = formData[field];
-    return !value || (typeof value === 'string' && (value.trim() === '' || value === '-- Select --'));
+    return isRequiredFieldEmpty(field, formData[field]);
   });
 
   const total = missingFields.length;
@@ -868,8 +927,16 @@ function Step1BasicIdentity({ formData, updateField, validationErrors, attempted
   return (
     <>
       <FormSection title="Basic Identity · ব্যক্তিগত পরিচয়" icon="👤">
-        <PhotoUpload />
+        {/* Photo Upload Section */}
+        <div id="field-photoUploaded" className={getFieldWrapperClass('photoUploaded')}>
+          <PhotoUpload onUpload={(val) => updateField('photoUploaded', val)} />
+          <FieldError show={showError('photoUploaded')} message="Passport-size photo is required" />
+        </div>
 
+        {/* Divider */}
+        <div className="border-t border-[#1c2540] my-2" />
+
+        {/* Name Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div id="field-fullNameEnglish" className={getFieldWrapperClass('fullNameEnglish')}>
             <FormField
@@ -903,9 +970,12 @@ function Step1BasicIdentity({ formData, updateField, validationErrors, attempted
               sublabel="পিতার নাম"
               placeholder="Father's full name"
               required
+              pattern="[A-Za-z\s\.\-']+"
+              title="Please enter English characters only"
               value={formData.fathersName || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('fathersName', e.target.value)}
             />
+            <p className="text-[#6a7194] text-[10px] mt-0.5">English characters only</p>
             <FieldError show={showError('fathersName')} message="Father's name is required" />
           </div>
           <div id="field-mothersName" className={getFieldWrapperClass('mothersName')}>
@@ -914,13 +984,20 @@ function Step1BasicIdentity({ formData, updateField, validationErrors, attempted
               sublabel="মাতার নাম"
               placeholder="Mother's full name"
               required
+              pattern="[A-Za-z\s\.\-']+"
+              title="Please enter English characters only"
               value={formData.mothersName || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('mothersName', e.target.value)}
             />
+            <p className="text-[#6a7194] text-[10px] mt-0.5">English characters only</p>
             <FieldError show={showError('mothersName')} message="Mother's name is required" />
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="border-t border-[#1c2540] my-2" />
+
+        {/* Identity Fields */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div id="field-dateOfBirth" className={getFieldWrapperClass('dateOfBirth')}>
             <DateField
@@ -1006,15 +1083,28 @@ function Step2ContactJob({ formData, updateField, validationErrors, attemptedSub
     return '';
   };
 
+  const handleMobileChange = (field: string, rawValue: string) => {
+    const prefix = '+880';
+    let val = rawValue;
+    if (!val.startsWith(prefix)) {
+      val = prefix + val.replace(/^\+880/, '');
+    }
+    if (val.length > 14) val = val.slice(0, 14);
+    updateField(field, val);
+  };
+
   return (
     <>
       <FormSection title="Contact Information · যোগাযোগের তথ্য" icon="📞">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div id="field-mobileNumber" className={getFieldWrapperClass('mobileNumber')}>
-            <FormField label="Mobile Number" sublabel="মোবাইল নম্বর" type="tel" placeholder="+880 1X-XXXX-XXXX" required value={formData.mobileNumber || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('mobileNumber', e.target.value)} />
-            <FieldError show={showError('mobileNumber')} message="Mobile number is required" />
+            <FormField label="Mobile Number" sublabel="মোবাইল নম্বর" type="tel" placeholder="+880 1X-XXXX-XXXX" required value={formData.mobileNumber || '+880'} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleMobileChange('mobileNumber', e.target.value)} maxLength={14} />
+            <FieldError show={showError('mobileNumber')} message="Must be a valid Bangladesh number starting with +880 (e.g. +8801XXXXXXXXX)" />
           </div>
-          <FormField label="Alternative Mobile" sublabel="বিকল্প মোবাইল (Optional)" type="tel" placeholder="+880 1X-XXXX-XXXX" value={formData.alternativeMobile || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('alternativeMobile', e.target.value)} />
+          <div id="field-alternativeMobile" className={getFieldWrapperClass('alternativeMobile')}>
+            <FormField label="Alternative Mobile" sublabel="বিকল্প মোবাইল" type="tel" placeholder="+880 1X-XXXX-XXXX" required value={formData.alternativeMobile || '+880'} onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleMobileChange('alternativeMobile', e.target.value)} maxLength={14} />
+            <FieldError show={showError('alternativeMobile')} message="Must be a valid Bangladesh number starting with +880 (e.g. +8801XXXXXXXXX)" />
+          </div>
           <div id="field-email" className={getFieldWrapperClass('email')}>
             <FormField label="Email Address" sublabel="ইমেইল" type="email" placeholder="teacher@example.com" required value={formData.email || ''} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('email', e.target.value)} />
             <FieldError show={showError('email')} message="Email is required" />
@@ -1057,8 +1147,14 @@ function Step2ContactJob({ formData, updateField, validationErrors, attemptedSub
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DateField label="Expected Joining Date" sublabel="যোগদানের তারিখ" required value={formData.expectedJoiningDate || ''} onChange={(value) => updateField('expectedJoiningDate', value)} />
-          <FormField label="Employment Type" sublabel="চাকরির ধরন" type="select" options={['', 'Full-time', 'Part-time', 'Contractual']} required value={formData.employmentType || ''} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('employmentType', e.target.value)} />
+          <div id="field-expectedJoiningDate" className={getFieldWrapperClass('expectedJoiningDate')}>
+            <DateField label="Expected Joining Date" sublabel="যোগদানের তারিখ" required value={formData.expectedJoiningDate || ''} onChange={(value) => updateField('expectedJoiningDate', value)} />
+            <FieldError show={showError('expectedJoiningDate')} message="Expected joining date is required" />
+          </div>
+          <div id="field-employmentType" className={getFieldWrapperClass('employmentType')}>
+            <FormField label="Employment Type" sublabel="চাকরির ধরন" type="select" options={['', 'Full-time', 'Part-time', 'Contractual']} required value={formData.employmentType || ''} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('employmentType', e.target.value)} />
+            <FieldError show={showError('employmentType')} message="Employment type is required" />
+          </div>
         </div>
       </FormSection>
     </>
@@ -1066,6 +1162,8 @@ function Step2ContactJob({ formData, updateField, validationErrors, attemptedSub
 }
 
 function Step3Academics({ formData, updateField, validationErrors, attemptedSubmit }: StepProps) {
+  const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
+
   return (
     <FormSection title="Academic Qualifications · শিক্ষাগত যোগ্যতা" icon="🎓">
       {/* Qualification #1 - SSC (Default) */}
@@ -1082,63 +1180,107 @@ function Step3Academics({ formData, updateField, validationErrors, attemptedSubm
               value={formData.examDegreeName1 || '-- Select --'}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('examDegreeName1', e.target.value)}
             />
-            <FieldError show={attemptedSubmit && validationErrors.examDegreeName1} message="Qualification #1 is required" />
+            <FieldError show={showError('examDegreeName1')} message="Qualification #1 is required" />
           </div>
-          <FormField
-            label="Group / Subject"
-            sublabel="বিভাগ / বিষয়"
-            placeholder="e.g. Science, Arts, Mathematics"
-          />
-          <FormField
-            label="Board / University"
-            sublabel="বোর্ড / বিশ্ববিদ্যালয়"
-            placeholder="Board or University name"
-          />
+          <div id="field-groupSubject1">
+            <FormField
+              label="Group / Subject"
+              sublabel="বিভাগ / বিষয়"
+              placeholder="e.g. Science, Arts, Mathematics"
+              required
+              value={formData.groupSubject1 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('groupSubject1', e.target.value)}
+            />
+            <FieldError show={showError('groupSubject1')} message="Group / Subject is required" />
+          </div>
+          <div id="field-boardUniversity1">
+            <FormField
+              label="Board / University"
+              sublabel="বোর্ড / বিশ্ববিদ্যালয়"
+              placeholder="Board or University name"
+              required
+              value={formData.boardUniversity1 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('boardUniversity1', e.target.value)}
+            />
+            <FieldError show={showError('boardUniversity1')} message="Board / University is required" />
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <FormField
-            label="Institution Name"
-            sublabel="প্রতিষ্ঠানের নাম"
-            placeholder="School / College / University"
-          />
-          <FormField
-            label="Passing Year"
-            sublabel="পাশের সাল"
-            type="number"
-            placeholder="e.g. 2015"
-            min={1970}
-            max={2030}
-          />
-          <FormField
-            label="Result / GPA / CGPA"
-            sublabel="ফলাফল / জিপিএ"
-            placeholder="e.g. GPA 5.00 / A+ / Division 1"
-          />
+          <div id="field-institutionName1">
+            <FormField
+              label="Institution Name"
+              sublabel="প্রতিষ্ঠানের নাম"
+              placeholder="School / College / University"
+              required
+              value={formData.institutionName1 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('institutionName1', e.target.value)}
+            />
+            <FieldError show={showError('institutionName1')} message="Institution name is required" />
+          </div>
+          <div id="field-passingYear1">
+            <FormField
+              label="Passing Year"
+              sublabel="পাশের সাল"
+              type="number"
+              placeholder="e.g. 2015"
+              min={1970}
+              max={2030}
+              required
+              value={formData.passingYear1 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('passingYear1', e.target.value)}
+            />
+            <FieldError show={showError('passingYear1')} message="Passing year is required" />
+          </div>
+          <div id="field-result1">
+            <FormField
+              label="Result / GPA / CGPA"
+              sublabel="ফলাফল / জিপিএ"
+              placeholder="e.g. GPA 5.00 / A+ / Division 1"
+              required
+              value={formData.result1 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('result1', e.target.value)}
+            />
+            <FieldError show={showError('result1')} message="Result is required" />
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-start">
-          <FormField
-            label="Out Of"
-            sublabel="সর্বোচ্চ নম্বর"
-            placeholder="e.g. 5.00 / 4.00 / 800"
-          />
-          <FormField
-            label="Duration"
-            sublabel="মেয়াদকাল"
-            placeholder="e.g. 2 years / 4 semesters"
-          />
-          <div className="h-full flex flex-col">
+          <div id="field-outOf1">
+            <FormField
+              label="Out Of"
+              sublabel="সর্বোচ্চ নম্বর"
+              placeholder="e.g. 5.00 / 4.00 / 800"
+              required
+              value={formData.outOf1 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('outOf1', e.target.value)}
+            />
+            <FieldError show={showError('outOf1')} message="Out Of is required" />
+          </div>
+          <div id="field-duration1">
+            <FormField
+              label="Duration"
+              sublabel="মেয়াদকাল"
+              placeholder="e.g. 2 years / 4 semesters"
+              required
+              value={formData.duration1 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('duration1', e.target.value)}
+            />
+            <FieldError show={showError('duration1')} message="Duration is required" />
+          </div>
+          <div id="field-certificate1" className="h-full flex flex-col">
             <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-2 leading-tight">
-              Certificate Upload<br/>সনদ যুক্ত করুন
+              Certificate Upload <span className="text-[#f85c5c]">*</span><br/>সনদ যুক্ত করুন
             </label>
-            <div className="flex-1 relative flex flex-col items-center justify-center gap-2 w-full min-h-[100px] px-4 py-4 border-2 border-dashed border-[#1c2540] rounded-lg hover:border-[#00e0c7] hover:bg-[#0f1524] transition-all bg-[#0d1220]">
+            <div className={`flex-1 relative flex flex-col items-center justify-center gap-2 w-full min-h-[100px] px-4 py-4 border-2 border-dashed rounded-lg hover:border-[#00e0c7] hover:bg-[#0f1524] transition-all bg-[#0d1220] ${showError('certificate1') ? 'border-[rgba(248,92,92,0.5)]' : 'border-[#1c2540]'}`}>
               <input
                 type="file"
                 accept=".pdf,image/*"
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={(e) => updateField('certificate1', e.target.files?.[0]?.name || '')}
               />
               <span className="text-[16px]">📎</span>
-              <span className="text-[11px] text-[#6a7194]">Browse file</span>
+              <span className="text-[11px] text-[#6a7194]">{formData.certificate1 ? formData.certificate1 : 'Browse file'}</span>
             </div>
+            <FieldError show={showError('certificate1')} message="Certificate is required" />
           </div>
           <div className="h-full flex flex-col">
             <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-2 leading-tight">
@@ -1174,63 +1316,107 @@ function Step3Academics({ formData, updateField, validationErrors, attemptedSubm
               value={formData.examDegreeName2 || '-- Select --'}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateField('examDegreeName2', e.target.value)}
             />
-            <FieldError show={attemptedSubmit && validationErrors.examDegreeName2} message="Qualification #2 is required" />
+            <FieldError show={showError('examDegreeName2')} message="Qualification #2 is required" />
           </div>
-          <FormField
-            label="Group / Subject"
-            sublabel="বিভাগ / বিষয়"
-            placeholder="e.g. Science, Arts, Mathematics"
-          />
-          <FormField
-            label="Board / University"
-            sublabel="বোর্ড / বিশ্ববিদ্যালয়"
-            placeholder="Board or University name"
-          />
+          <div id="field-groupSubject2">
+            <FormField
+              label="Group / Subject"
+              sublabel="বিভাগ / বিষয়"
+              placeholder="e.g. Science, Arts, Mathematics"
+              required
+              value={formData.groupSubject2 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('groupSubject2', e.target.value)}
+            />
+            <FieldError show={showError('groupSubject2')} message="Group / Subject is required" />
+          </div>
+          <div id="field-boardUniversity2">
+            <FormField
+              label="Board / University"
+              sublabel="বোর্ড / বিশ্ববিদ্যালয়"
+              placeholder="Board or University name"
+              required
+              value={formData.boardUniversity2 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('boardUniversity2', e.target.value)}
+            />
+            <FieldError show={showError('boardUniversity2')} message="Board / University is required" />
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <FormField
-            label="Institution Name"
-            sublabel="প্রতিষ্ঠানের নাম"
-            placeholder="School / College / University"
-          />
-          <FormField
-            label="Passing Year"
-            sublabel="পাশের সাল"
-            type="number"
-            placeholder="e.g. 2017"
-            min={1970}
-            max={2030}
-          />
-          <FormField
-            label="Result / GPA / CGPA"
-            sublabel="ফলাফল / জিপিএ"
-            placeholder="e.g. GPA 5.00 / A+ / Division 1"
-          />
+          <div id="field-institutionName2">
+            <FormField
+              label="Institution Name"
+              sublabel="প্রতিষ্ঠানের নাম"
+              placeholder="School / College / University"
+              required
+              value={formData.institutionName2 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('institutionName2', e.target.value)}
+            />
+            <FieldError show={showError('institutionName2')} message="Institution name is required" />
+          </div>
+          <div id="field-passingYear2">
+            <FormField
+              label="Passing Year"
+              sublabel="পাশের সাল"
+              type="number"
+              placeholder="e.g. 2017"
+              min={1970}
+              max={2030}
+              required
+              value={formData.passingYear2 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('passingYear2', e.target.value)}
+            />
+            <FieldError show={showError('passingYear2')} message="Passing year is required" />
+          </div>
+          <div id="field-result2">
+            <FormField
+              label="Result / GPA / CGPA"
+              sublabel="ফলাফল / জিপিএ"
+              placeholder="e.g. GPA 5.00 / A+ / Division 1"
+              required
+              value={formData.result2 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('result2', e.target.value)}
+            />
+            <FieldError show={showError('result2')} message="Result is required" />
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-start">
-          <FormField
-            label="Out Of"
-            sublabel="সর্বোচ্চ নম্বর"
-            placeholder="e.g. 5.00 / 4.00 / 800"
-          />
-          <FormField
-            label="Duration"
-            sublabel="মেয়াদকাল"
-            placeholder="e.g. 2 years / 4 semesters"
-          />
-          <div className="h-full flex flex-col">
+          <div id="field-outOf2">
+            <FormField
+              label="Out Of"
+              sublabel="সর্বোচ্চ নম্বর"
+              placeholder="e.g. 5.00 / 4.00 / 800"
+              required
+              value={formData.outOf2 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('outOf2', e.target.value)}
+            />
+            <FieldError show={showError('outOf2')} message="Out Of is required" />
+          </div>
+          <div id="field-duration2">
+            <FormField
+              label="Duration"
+              sublabel="মেয়াদকাল"
+              placeholder="e.g. 2 years / 4 semesters"
+              required
+              value={formData.duration2 || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField('duration2', e.target.value)}
+            />
+            <FieldError show={showError('duration2')} message="Duration is required" />
+          </div>
+          <div id="field-certificate2" className="h-full flex flex-col">
             <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-2 leading-tight">
-              Certificate Upload<br/>সনদ যুক্ত করুন
+              Certificate Upload <span className="text-[#f85c5c]">*</span><br/>সনদ যুক্ত করুন
             </label>
-            <div className="flex-1 relative flex flex-col items-center justify-center gap-2 w-full min-h-[100px] px-4 py-4 border-2 border-dashed border-[#1c2540] rounded-lg hover:border-[#00e0c7] hover:bg-[#0f1524] transition-all bg-[#0d1220]">
+            <div className={`flex-1 relative flex flex-col items-center justify-center gap-2 w-full min-h-[100px] px-4 py-4 border-2 border-dashed rounded-lg hover:border-[#00e0c7] hover:bg-[#0f1524] transition-all bg-[#0d1220] ${showError('certificate2') ? 'border-[rgba(248,92,92,0.5)]' : 'border-[#1c2540]'}`}>
               <input
                 type="file"
                 accept=".pdf,image/*"
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={(e) => updateField('certificate2', e.target.files?.[0]?.name || '')}
               />
               <span className="text-[16px]">📎</span>
-              <span className="text-[11px] text-[#6a7194]">Browse file</span>
+              <span className="text-[11px] text-[#6a7194]">{formData.certificate2 ? formData.certificate2 : 'Browse file'}</span>
             </div>
+            <FieldError show={showError('certificate2')} message="Certificate is required" />
           </div>
           <div className="h-full flex flex-col">
             <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-2 leading-tight">
@@ -1257,7 +1443,7 @@ function Step3Academics({ formData, updateField, validationErrors, attemptedSubm
 }
 
 function Step4ProfessionalQualifications({ formData, updateField, validationErrors, attemptedSubmit, highlightedField }: StepProps) {
-  const [hasQualifications, setHasQualifications] = useState(true);
+  const hasQualifications = formData.hasQualifications !== 'no';
   const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
   const getFieldWrapperClass = (fieldName: string) => {
     if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
@@ -1272,8 +1458,8 @@ function Step4ProfessionalQualifications({ formData, updateField, validationErro
           Do you have professional qualifications? · আপনার পেশাগত যোগ্যতা আছে?
         </label>
         <div className="flex gap-2">
-          <button type="button" onClick={() => setHasQualifications(true)} className={`px-4 py-2 rounded text-[12px] transition-all ${hasQualifications ? 'bg-[#00e0c7] text-[#040913] font-medium' : 'bg-[#0d1220] border border-[#1c2540] text-[#8d98ae] hover:border-[#00e0c7]'}`}>Yes</button>
-          <button type="button" onClick={() => { setHasQualifications(false); updateField('ntrcaStatus', 'Not Applicable'); updateField('mpoExperience', 'No'); }} className={`px-4 py-2 rounded text-[12px] transition-all ${!hasQualifications ? 'bg-[#f85c5c] text-white font-medium' : 'bg-[#0d1220] border border-[#1c2540] text-[#8d98ae] hover:border-[#f85c5c]'}`}>No</button>
+          <button type="button" onClick={() => updateField('hasQualifications', 'yes')} className={`px-4 py-2 rounded text-[12px] transition-all ${hasQualifications ? 'bg-[#00e0c7] text-[#040913] font-medium' : 'bg-[#0d1220] border border-[#1c2540] text-[#8d98ae] hover:border-[#00e0c7]'}`}>Yes</button>
+          <button type="button" onClick={() => { updateField('hasQualifications', 'no'); updateField('ntrcaStatus', 'Not Applicable'); updateField('mpoExperience', 'No'); }} className={`px-4 py-2 rounded text-[12px] transition-all ${!hasQualifications ? 'bg-[#f85c5c] text-white font-medium' : 'bg-[#0d1220] border border-[#1c2540] text-[#8d98ae] hover:border-[#f85c5c]'}`}>No</button>
         </div>
       </div>
 
@@ -1308,7 +1494,7 @@ function Step4ProfessionalQualifications({ formData, updateField, validationErro
 }
 
 function Step5TeachingExperience({ formData, updateField, validationErrors, attemptedSubmit }: StepProps) {
-  const [hasExperience, setHasExperience] = useState(true);
+  const hasExperience = formData.hasTeachingExperience !== 'no';
   const [experiences, setExperiences] = useState([
     { id: 1, institutionName: '', institutionType: '', subjectTaught: '', classRange: '', servingTime: '', currentlyWorking: 'No', reasonForLeaving: '' }
   ]);
@@ -1336,6 +1522,9 @@ function Step5TeachingExperience({ formData, updateField, validationErrors, atte
       exp.id === id ? { ...exp, [field]: value } : exp
     ));
   };
+
+  const showExpError = (exp: typeof experiences[0], field: keyof typeof experiences[0]) =>
+    attemptedSubmit && hasExperience && !exp[field];
   
   return (
     <FormSection title="Work Experience · কর্ম অভিজ্ঞতা" icon="💼">
@@ -1346,7 +1535,7 @@ function Step5TeachingExperience({ formData, updateField, validationErrors, atte
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => setHasExperience(true)}
+            onClick={() => updateField('hasTeachingExperience', 'yes')}
             className={`px-4 py-2 rounded text-[12px] transition-all ${
               hasExperience
                 ? 'bg-[#00e0c7] text-[#040913] font-medium'
@@ -1357,7 +1546,7 @@ function Step5TeachingExperience({ formData, updateField, validationErrors, atte
           </button>
           <button
             type="button"
-            onClick={() => setHasExperience(false)}
+            onClick={() => updateField('hasTeachingExperience', 'no')}
             className={`px-4 py-2 rounded text-[12px] transition-all ${
               !hasExperience
                 ? 'bg-[#f85c5c] text-white font-medium'
@@ -1391,48 +1580,68 @@ function Step5TeachingExperience({ formData, updateField, validationErrors, atte
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField 
-                    label="Institution Name" 
-                    sublabel="প্রতিষ্ঠানের নাম" 
-                    placeholder="School / College name"
-                    value={exp.institutionName}
-                    onChange={(e) => updateExperience(exp.id, 'institutionName', e.target.value)}
-                  />
-                  <FormField 
-                    label="Institution Type" 
-                    sublabel="প্রতিষ্ঠানের ধরন" 
-                    type="select"
-                    options={['Select Type', 'School', 'College', 'University', 'Private Tutoring', 'Coaching Center', 'Other']}
-                    value={exp.institutionType}
-                    onChange={(e) => updateExperience(exp.id, 'institutionType', e.target.value)}
-                  />
-                  <FormField 
-                    label="Subject Taught" 
-                    sublabel="পড়ানো বিষয়" 
-                    placeholder="e.g. Physics, Mathematics"
-                    value={exp.subjectTaught}
-                    onChange={(e) => updateExperience(exp.id, 'subjectTaught', e.target.value)}
-                  />
+                  <div>
+                    <FormField 
+                      label="Institution Name" 
+                      sublabel="প্রতিষ্ঠানের নাম" 
+                      placeholder="School / College name"
+                      required
+                      value={exp.institutionName}
+                      onChange={(e) => updateExperience(exp.id, 'institutionName', e.target.value)}
+                    />
+                    <FieldError show={showExpError(exp, 'institutionName')} message="Institution name is required" />
+                  </div>
+                  <div>
+                    <FormField 
+                      label="Institution Type" 
+                      sublabel="প্রতিষ্ঠানের ধরন" 
+                      type="select"
+                      options={['Select Type', 'School', 'College', 'University', 'Private Tutoring', 'Coaching Center', 'Other']}
+                      required
+                      value={exp.institutionType}
+                      onChange={(e) => updateExperience(exp.id, 'institutionType', e.target.value)}
+                    />
+                    <FieldError show={attemptedSubmit && hasExperience && (!exp.institutionType || exp.institutionType === 'Select Type')} message="Institution type is required" />
+                  </div>
+                  <div>
+                    <FormField 
+                      label="Subject Taught" 
+                      sublabel="পড়ানো বিষয়" 
+                      placeholder="e.g. Physics, Mathematics"
+                      required
+                      value={exp.subjectTaught}
+                      onChange={(e) => updateExperience(exp.id, 'subjectTaught', e.target.value)}
+                    />
+                    <FieldError show={showExpError(exp, 'subjectTaught')} message="Subject taught is required" />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                  <FormField 
-                    label="Class Range Taught" 
-                    sublabel="পড়ানো শ্রেণির সীমা" 
-                    placeholder="e.g. Class 9-12"
-                    value={exp.classRange}
-                    onChange={(e) => updateExperience(exp.id, 'classRange', e.target.value)}
-                  />
-                  <FormField 
-                    label="Serving / Total Time" 
-                    sublabel="কর্মকাল / মোট সময়" 
-                    placeholder="e.g. 3 years 6 months"
-                    value={exp.servingTime}
-                    onChange={(e) => updateExperience(exp.id, 'servingTime', e.target.value)}
-                  />
+                  <div>
+                    <FormField 
+                      label="Class Range Taught" 
+                      sublabel="পড়ানো শ্রেণির সীমা" 
+                      placeholder="e.g. Class 9-12"
+                      required
+                      value={exp.classRange}
+                      onChange={(e) => updateExperience(exp.id, 'classRange', e.target.value)}
+                    />
+                    <FieldError show={showExpError(exp, 'classRange')} message="Class range is required" />
+                  </div>
+                  <div>
+                    <FormField 
+                      label="Serving / Total Time" 
+                      sublabel="কর্মকাল / মোট সময়" 
+                      placeholder="e.g. 3 years 6 months"
+                      required
+                      value={exp.servingTime}
+                      onChange={(e) => updateExperience(exp.id, 'servingTime', e.target.value)}
+                    />
+                    <FieldError show={showExpError(exp, 'servingTime')} message="Serving time is required" />
+                  </div>
                   <div>
                     <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-3">
-                      Currently Working Here? · এখানে এখনও কাজ করছেন?
+                      Currently Working Here? · এখানে এখনো কাজ করছেন?
                     </label>
                     <div className="flex gap-2">
                       <button
@@ -1462,13 +1671,17 @@ function Step5TeachingExperience({ formData, updateField, validationErrors, atte
                 </div>
 
                 {exp.currentlyWorking === 'No' && (
-                  <FormField
-                    label="Reason for Leaving"
-                    sublabel="ছেড়ে যাওয়ার কারণ"
-                    placeholder="e.g. Better opportunity, Contract ended"
-                    value={exp.reasonForLeaving}
-                    onChange={(e) => updateExperience(exp.id, 'reasonForLeaving', e.target.value)}
-                  />
+                  <div>
+                    <FormField
+                      label="Reason for Leaving"
+                      sublabel="ছেড়ে যাওয়ার কারণ"
+                      placeholder="e.g. Better opportunity, Contract ended"
+                      required
+                      value={exp.reasonForLeaving}
+                      onChange={(e) => updateExperience(exp.id, 'reasonForLeaving', e.target.value)}
+                    />
+                    <FieldError show={attemptedSubmit && hasExperience && exp.currentlyWorking === 'No' && !exp.reasonForLeaving} message="Reason for leaving is required" />
+                  </div>
                 )}
               </div>
             </div>
@@ -1486,13 +1699,19 @@ function Step5TeachingExperience({ formData, updateField, validationErrors, atte
         </>
       )}
 
-      <FormField
-        label="Why do you want to work with us?"
-        sublabel="আমাদের সাথে কেন কাজ করতে চান?"
-        type="textarea"
-        placeholder="Describe your motivation and reasons for wanting to join our institution..."
-        rows={4}
-      />
+      <div id="field-whyWorkWithUs">
+        <FormField
+          label="Why do you want to work with us?"
+          sublabel="আমাদের সাথে কেন কাজ করতে চান?"
+          type="textarea"
+          placeholder="Describe your motivation and reasons for wanting to join our institution..."
+          rows={4}
+          required
+          value={formData.whyWorkWithUs || ''}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateField('whyWorkWithUs', e.target.value)}
+        />
+        <FieldError show={attemptedSubmit && validationErrors.whyWorkWithUs} message="This field is required" />
+      </div>
     </FormSection>
   );
 }

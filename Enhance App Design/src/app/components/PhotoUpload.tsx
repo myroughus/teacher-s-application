@@ -1,6 +1,10 @@
 import { useState } from 'react';
 
-export function PhotoUpload() {
+interface PhotoUploadProps {
+  onUpload?: (value: string) => void;
+}
+
+export function PhotoUpload({ onUpload }: PhotoUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -13,6 +17,7 @@ export function PhotoUpload() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
+        onUpload?.('yes');
       };
       reader.readAsDataURL(file);
     }
@@ -20,6 +25,7 @@ export function PhotoUpload() {
 
   const removePhoto = () => {
     setPreview(null);
+    onUpload?.('');
   };
 
   return (
