@@ -18,7 +18,7 @@ const STEP_REQUIRED_FIELDS: Record<number, string[]> = {
   3: ['examDegreeName1', 'groupSubject1', 'boardUniversity1', 'institutionName1', 'passingYear1', 'result1', 'outOf1', 'duration1', 'certificate1', 'examDegreeName2', 'groupSubject2', 'boardUniversity2', 'institutionName2', 'passingYear2', 'result2', 'outOf2', 'duration2', 'certificate2'],
   4: ['ntrcaStatus', 'mpoExperience'],
   5: ['whyWorkWithUs'],
-  6: ['englishProficiency', 'spokenEnglishLevel', 'arabicProficiency', 'spokenArabicLevel'],
+  6: ['preferredSubjects', 'englishProficiency', 'spokenEnglishLevel', 'arabicProficiency', 'spokenArabicLevel'],
   7: ['emergencyContactName', 'emergencyContactNumber', 'emergencyContactRelation'],
   8: ['doc_passportPhoto', 'doc_nationalId', 'doc_birthCertificate', 'doc_signature'],
   9: ['ref1Name', 'ref1Designation', 'ref1Organization', 'ref1Relationship', 'ref1Phone', 'ref1Email'],
@@ -69,6 +69,7 @@ const ALL_REQUIRED_FIELDS = [
   { step: 4, field: 'ntrcaStatus' },
   { step: 4, field: 'mpoExperience' },
   { step: 5, field: 'whyWorkWithUs' },
+  { step: 6, field: 'preferredSubjects' },
   { step: 6, field: 'englishProficiency' },
   { step: 6, field: 'spokenEnglishLevel' },
   { step: 6, field: 'arabicProficiency' },
@@ -312,7 +313,7 @@ export function TeacherApplicationForm() {
           ) : (
             <button
               onClick={handleSubmit}
-              className="px-10 py-4 text-[15px] font-bold rounded-xl bg-gradient-to-r from-[#00e0c7] to-[#00c896] text-[#040913] hover:from-[#00c8b2] hover:to-[#00b884] transition-all shadow-lg"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#00e0c7] to-[#00c896] text-[#040913] rounded-lg hover:from-[#00c8b2] hover:to-[#00b884] transition-all font-medium text-[12px] shadow-md"
             >
               Submit Application ✓
             </button>
@@ -344,6 +345,7 @@ function FieldError({ show, message }: { show: boolean; message: string }) {
 
 // Helper: check if a required field value is considered empty/invalid
 function isRequiredFieldEmpty(field: string, value: any): boolean {
+  if (Array.isArray(value)) return value.length === 0;
   if (!value || (typeof value === 'string' && (value.trim() === '' || value === '-- Select --'))) return true;
   // Mobile fields need exactly 14 chars ('+880' prefix + 10 digits)
   if ((field === 'mobileNumber' || field === 'alternativeMobile') && typeof value === 'string') {
@@ -356,6 +358,7 @@ function isRequiredFieldEmpty(field: string, value: any): boolean {
 function shouldSkipField(field: string, formData: Record<string, any>): boolean {
   if ((field === 'ntrcaStatus' || field === 'mpoExperience') && formData.hasQualifications === 'no') return true;
   if (['englishProficiency', 'spokenEnglishLevel', 'arabicProficiency', 'spokenArabicLevel'].includes(field) && formData.isLanguageProficient !== 'yes') return true;
+  if (field === 'preferredSubjects' && (!formData.classesHandled || formData.classesHandled.length === 0)) return true;
   if (['ref1Name', 'ref1Designation', 'ref1Organization', 'ref1Relationship', 'ref1Phone', 'ref1Email'].includes(field) && formData.hasReferences === false) return true;
   return false;
 }
@@ -407,6 +410,7 @@ const FIELD_LABELS: Record<string, string> = {
   emergencyContactName: 'Emergency Contact Person',
   emergencyContactNumber: 'Emergency Contact Number',
   emergencyContactRelation: 'Emergency Contact Relation',
+  preferredSubjects: 'Preferred Subjects to Teach',
   englishProficiency: 'English Proficiency',
   spokenEnglishLevel: 'Spoken English Level',
   arabicProficiency: 'Arabic Proficiency',
@@ -965,7 +969,7 @@ function Step1BasicIdentity({ formData, updateField, validationErrors, attempted
       return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
     }
     if (hasError) {
-      return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+      return 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]';
     }
     return '';
   };
@@ -1125,7 +1129,7 @@ function Step2ContactJob({ formData, updateField, validationErrors, attemptedSub
   const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
   const getFieldWrapperClass = (fieldName: string) => {
     if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
-    if (showError(fieldName)) return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+    if (showError(fieldName)) return 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]';
     return '';
   };
 
@@ -1493,7 +1497,7 @@ function Step4ProfessionalQualifications({ formData, updateField, validationErro
   const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
   const getFieldWrapperClass = (fieldName: string) => {
     if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
-    if (showError(fieldName)) return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+    if (showError(fieldName)) return 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]';
     return '';
   };
 
@@ -1818,7 +1822,9 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
   };
   
   const toggleClass = (cls: string) => {
-    setClassesHandled([cls]);
+    setClassesHandled(prev => 
+      prev.includes(cls) ? prev.filter(c => c !== cls) : [...prev, cls]
+    );
   };
   
   const isPrimaryClassSelected = classesHandled.includes('Class 0-5');
@@ -1878,25 +1884,23 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
     { value: 'Higher Mathematics', label: 'উচ্চতর গণিত · Higher Mathematics' }
   ];
   
-  // Helper function to merge subject arrays - union (all unique subjects)
-  // Common subjects appear once, uncommon subjects appear individually
+  // Helper function to merge subject arrays - union with deduplication by English name
+  // Subjects sharing the same English name (after ' · ') are deduplicated; last encountered wins
   const getUnion = (arrays: Array<typeof primarySubjects0to5>) => {
     if (arrays.length === 0) return [];
     if (arrays.length === 1) return arrays[0];
     
-    const merged: typeof primarySubjects0to5 = [];
-    const seenValues = new Set<string>();
+    const map = new Map<string, typeof primarySubjects0to5[0]>();
     
     for (const arr of arrays) {
       for (const subject of arr) {
-        if (!seenValues.has(subject.value)) {
-          seenValues.add(subject.value);
-          merged.push(subject);
-        }
+        const separatorIdx = subject.label.indexOf(' · ');
+        const key = separatorIdx !== -1 ? subject.label.slice(separatorIdx + 3) : subject.label;
+        map.set(key, subject);
       }
     }
     
-    return merged;
+    return Array.from(map.values());
   };
   
   // Build arrays of selected primary and secondary subjects
@@ -1929,6 +1933,15 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
   useEffect(() => {
     setAdditionalSubjects(prev => prev.filter(sub => !preferredSubjects.includes(sub)));
   }, [preferredSubjects]);
+
+  // Sync preferredSubjects and classesHandled to formData for validation
+  useEffect(() => {
+    updateField('preferredSubjects', preferredSubjects);
+  }, [preferredSubjects]);
+
+  useEffect(() => {
+    updateField('classesHandled', classesHandled);
+  }, [classesHandled]);
   
   return (
     <>
@@ -1958,16 +1971,19 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {isPrimaryClassSelected || isSecondaryClassSelected || isClass9to10Selected ? (
             <>
-              <div>
+              <div id="field-preferredSubjects">
                 <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-3">
                   Preferred Subjects to Teach · পাঠদানের জন্য পছন্দের বিষয় <span className="text-[#f85c5c]">*</span>
                 </label>
-                <CheckboxGroup
-                  options={primarySubjects}
-                  selected={preferredSubjects}
-                  onChange={setPreferredSubjects}
-                  columns={2}
-                />
+                <div className={showError('preferredSubjects') ? 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]' : ''}>
+                  <CheckboxGroup
+                    options={primarySubjects}
+                    selected={preferredSubjects}
+                    onChange={setPreferredSubjects}
+                    columns={2}
+                  />
+                </div>
+                <FieldError show={!!showError('preferredSubjects')} message="Please select at least one preferred subject" />
               </div>
               <div>
                 <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-3">
@@ -2151,7 +2167,7 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
         {showLanguageDropdowns && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div id="field-englishProficiency" className={showError('englishProficiency') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+              <div id="field-englishProficiency" className={showError('englishProficiency') ? 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]' : ''}>
                 <FormField
                   label="English Proficiency"
                   sublabel="ইংরেজি দক্ষতা"
@@ -2163,7 +2179,7 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
                 />
                 <FieldError show={showError('englishProficiency')} message="English proficiency is required" />
               </div>
-              <div id="field-spokenEnglishLevel" className={showError('spokenEnglishLevel') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+              <div id="field-spokenEnglishLevel" className={showError('spokenEnglishLevel') ? 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]' : ''}>
                 <FormField
                   label="Spoken English Level"
                   sublabel="বলিত ইংরেজির স্তর"
@@ -2175,7 +2191,7 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
                 />
                 <FieldError show={showError('spokenEnglishLevel')} message="Spoken English level is required" />
               </div>
-              <div id="field-arabicProficiency" className={showError('arabicProficiency') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+              <div id="field-arabicProficiency" className={showError('arabicProficiency') ? 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]' : ''}>
                 <FormField
                   label="Arabic Proficiency"
                   sublabel="আরবি দক্ষতা"
@@ -2190,7 +2206,7 @@ function Step6SuitabilitySkills({ formData, updateField, validationErrors, attem
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div id="field-spokenArabicLevel" className={showError('spokenArabicLevel') ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+              <div id="field-spokenArabicLevel" className={showError('spokenArabicLevel') ? 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]' : ''}>
                 <FormField
                   label="Spoken Arabic Level"
                   sublabel="বলিত আরবির স্তর"
@@ -2555,7 +2571,7 @@ function Step7PersonalBackground({ formData, updateField, validationErrors, atte
   const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
   const getFieldWrapperClass = (fieldName: string) => {
     if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
-    if (showError(fieldName)) return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+    if (showError(fieldName)) return 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]';
     return '';
   };
 
@@ -2613,7 +2629,7 @@ function Step8Documents({ formData, updateField, validationErrors, attemptedSubm
   const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
   const getFieldWrapperClass = (fieldName: string) => {
     if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
-    if (showError(fieldName)) return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+    if (showError(fieldName)) return 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]';
     return '';
   };
 
@@ -2667,7 +2683,7 @@ function Step9References({ formData, updateField, validationErrors, attemptedSub
   const showError = (fieldName: string) => attemptedSubmit && validationErrors[fieldName];
   const getFieldWrapperClass = (fieldName: string) => {
     if (highlightedField === fieldName) return 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse';
-    if (showError(fieldName)) return 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded';
+    if (showError(fieldName)) return 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]';
     return '';
   };
 
@@ -2933,7 +2949,7 @@ function Step10Declaration({ formData, updateField, validationErrors, attemptedS
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#1c2540]">
-        <div id="field-signatureCanvas" className={highlightedField === 'signatureCanvas' ? 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse' : attemptedSubmit && validationErrors.signatureCanvas ? 'p-2 bg-[rgba(248,92,92,0.05)] border border-[rgba(248,92,92,0.2)] rounded' : ''}>
+        <div id="field-signatureCanvas" className={highlightedField === 'signatureCanvas' ? 'p-2 bg-[rgba(0,224,199,0.08)] border-2 border-[#00e0c7] rounded shadow-[0_0_20px_rgba(0,224,199,0.3)] animate-pulse' : attemptedSubmit && validationErrors.signatureCanvas ? 'p-2 rounded-lg border-l-4 border-l-[#f85c5c] border border-[rgba(248,92,92,0.3)] bg-[rgba(248,92,92,0.06)] shadow-[0_2px_8px_rgba(248,92,92,0.12)]' : ''}>
           <label className="block text-[10px] tracking-[0.12em] uppercase text-[#6a7194] mb-2">
             Applicant Signature (Draw) <span className="text-[#f85c5c]">*</span>
           </label>

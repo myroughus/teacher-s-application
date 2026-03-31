@@ -4,7 +4,17 @@ interface ProgressBarProps {
   totalSteps: number;
 }
 
-export function ProgressBar({ progress, currentStep, totalSteps }: ProgressBarProps) {
+function getProgressWidth(step: number, total: number): number {
+  if (step >= total) return 100;
+  if (step === total - 1) {
+    const pos9 = ((total - 2) / (total - 1)) * 100;
+    return (pos9 + 100) / 2;
+  }
+  return ((step - 1) / (total - 1)) * 100;
+}
+
+export function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
+  const width = getProgressWidth(currentStep, totalSteps);
   return (
     <div className="mb-8">
       <div
@@ -17,7 +27,7 @@ export function ProgressBar({ progress, currentStep, totalSteps }: ProgressBarPr
         <div
           className="h-full rounded-[99px]"
           style={{
-            width: `${progress}%`,
+            width: `${width}%`,
             background: 'linear-gradient(90deg, #00e0c7, #2b7fff)',
             boxShadow: '0 0 8px rgba(0,224,199,0.22)',
             transition: 'width 0.45s cubic-bezier(0.4,0,0.2,1)',
